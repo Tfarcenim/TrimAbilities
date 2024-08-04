@@ -35,6 +35,11 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDuck {
     }
 
     @Override
+    public void setTrimPower(int trimPower) {
+        this.trimPower = trimPower;
+    }
+
+    @Override
     public void setTrimPowerNoUpdate(int trimPower) {
         this.trimPower = trimPower;
     }

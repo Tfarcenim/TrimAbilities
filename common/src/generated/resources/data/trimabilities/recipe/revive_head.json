@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "e": {
+      "item": "minecraft:diamond_block"
+    },
+    "g": {
+      "item": "minecraft:black_dye"
+    },
+    "n": {
+      "item": "minecraft:golden_apple"
+    },
+    "t": {
+      "item": "minecraft:book"
+    },
+    "w": {
+      "item": "minecraft:ender_pearl"
+    }
+  },
+  "pattern": [
+    "ene",
+    "wtw",
+    "ege"
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_name": "{\"italic\":false,\"text\":\"Revive Head\"}",
+      "minecraft:enchantment_glint_override": true,
+      "minecraft:rarity": "rare"
+    },
+    "count": 1,
+    "id": "minecraft:gold_block"
+  }
+}

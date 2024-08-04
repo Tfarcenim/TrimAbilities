@@ -49,6 +49,10 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+
+    repositories {
+        maven { url 'https://maven.nucleoid.xyz' }
+    }
 }
 
 // Declare capabilities on the outgoing configurations.

@@ -1,0 +1,3 @@
+accessWidener v1 named
+
+accessible method net/minecraft/server/commands/BanPlayerCommands banPlayers (Lnet/minecraft/commands/CommandSourceStack;Ljava/util/Collection;Lnet/minecraft/network/chat/Component;)I

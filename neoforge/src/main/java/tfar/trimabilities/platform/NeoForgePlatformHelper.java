@@ -1,5 +1,6 @@
 package tfar.trimabilities.platform;
 
+import net.minecraft.commands.CommandSourceStack;
 import tfar.trimabilities.platform.services.IPlatformHelper;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
@@ -27,5 +28,10 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     @Override
     public MLConfig getConfig() {
         return null;
+    }
+
+    @Override
+    public boolean checkBasicPermission(CommandSourceStack commandSourceStack, String node, int defaultValue) {
+        return commandSourceStack.hasPermission(defaultValue);
     }
 }

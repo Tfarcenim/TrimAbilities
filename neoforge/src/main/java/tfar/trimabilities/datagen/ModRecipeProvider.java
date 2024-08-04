@@ -1,17 +1,14 @@
 package tfar.trimabilities.datagen;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import tfar.trimabilities.TrimAbilities;
+import tfar.trimabilities.init.ModItems;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -25,12 +22,7 @@ public class ModRecipeProvider extends RecipeProvider {
 
     @Override
     protected void buildRecipes(RecipeOutput recipeOutput) {
-        ItemStack trimPoint = new ItemStack(Items.BLACK_DYE);
-        trimPoint.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE,true);
-        trimPoint.set(DataComponents.CUSTOM_NAME, Component.literal("Trim Power").setStyle(Style.EMPTY.withItalic(false)));
-
-
-        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT,trimPoint)
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.TRIM_POWER)
                 .define('e',Items.END_CRYSTAL)
                 .define('n',Items.NETHERITE_INGOT)
                 .define('w',Items.WITHER_SKELETON_SKULL)
@@ -40,7 +32,18 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("wtw")
                 .pattern("ege")
                 .unlockedBy(getHasName(Items.END_CRYSTAL),has(Items.END_CRYSTAL))
-                .save(recipeOutput,TrimAbilities.id("trim_power_point"));
-        ;
+                .save(recipeOutput,TrimAbilities.id("trim_power"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.REVIVE_HEAD)
+                .define('e',Items.DIAMOND_BLOCK)
+                .define('n',Items.GOLDEN_APPLE)
+                .define('w',Items.ENDER_PEARL)
+                .define('t',Items.BOOK)
+                .define('g',Items.BLACK_DYE)
+                .pattern("ene")
+                .pattern("wtw")
+                .pattern("ege")
+                .unlockedBy(getHasName(Items.DIAMOND_BLOCK),has(Items.DIAMOND_BLOCK))
+                .save(recipeOutput,TrimAbilities.id("revive_head"));
     }
 }

@@ -1,8 +1,19 @@
 package tfar.trimabilities;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.UserBanList;
+import net.minecraft.server.players.UserBanListEntry;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tfar.trimabilities.init.ModItems;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -27,8 +38,40 @@ public class TrimAbilities {
         // the platform specific approach.
     }
 
+    public static void onDeath(LivingEntity living, DamageSource damageSource) {
+        if (living instanceof ServerPlayer serverPlayer) {
+            PlayerDuck playerDuck = PlayerDuck.of(serverPlayer);
+
+            ItemEntity itemEntity = new ItemEntity(living.level(), living.getX(), living.getY(), living.getZ(), ModItems.TRIM_POWER);
+            itemEntity.setUnlimitedLifetime();
+            living.level().addFreshEntity(itemEntity);
+            playerDuck.addTrimPower(-1);
+            if (playerDuck.getTrimPower() < -3) {
+                deathBan(serverPlayer);
+            }
+        }
+    }
+
+    public static void deathBan(ServerPlayer player) {
+        UserBanList userbanlist = player.getServer().getPlayerList().getBans();
+        GameProfile gameprofile = player.getGameProfile();
+        CommandSourceStack commandSourceStack = player.getServer().createCommandSourceStack();
+
+        UserBanListEntry userbanlistentry = new UserBanListEntry(
+                gameprofile, null, commandSourceStack.getTextName(), null, ModCommands.DEATHBAN.getString());
+        userbanlist.add(userbanlistentry);
+        commandSourceStack.sendSuccess(
+                () -> Component.translatable("commands.ban.success", Component.literal(gameprofile.getName()), userbanlistentry.getReason()), true
+        );
+        player.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
+    }
+
+    public static void onClone(ServerPlayer originalPlayer, ServerPlayer newPlayer, boolean alive) {
+        PlayerDuck.of(originalPlayer).copyTo(newPlayer);
+    }
+
     public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID,path);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 
 }
