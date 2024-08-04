@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "e": {
+      "item": "minecraft:end_crystal"
+    },
+    "g": {
+      "item": "minecraft:golden_apple"
+    },
+    "n": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "t": {
+      "item": "minecraft:totem_of_undying"
+    },
+    "w": {
+      "item": "minecraft:wither_skeleton_skull"
+    }
+  },
+  "pattern": [
+    "ene",
+    "wtw",
+    "ege"
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_name": "{\"italic\":false,\"text\":\"Trim Power\"}",
+      "minecraft:enchantment_glint_override": true
+    },
+    "count": 1,
+    "id": "minecraft:black_dye"
+  }
+}
