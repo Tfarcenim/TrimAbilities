@@ -1,8 +1,10 @@
 package tfar.trimabilities;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserBanList;
@@ -52,6 +54,19 @@ public class TrimAbilities {
         }
     }
 
+    public static void onLogin(ServerPlayer player) {
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        if (playerDuck.getTrimPower() < -3) {
+            playerDuck.setTrimPower(0);
+        }
+    }
+
+    public static final MutableComponent DEATH_BAN_MESSAGE = Component.empty()
+            .append(Component.literal("You are death banned!").withStyle(ChatFormatting.RED))
+            .append("\n")
+            .append("\n")
+            .append(Component.literal("Try to get someone to revive you!"));
+
     public static void deathBan(ServerPlayer player) {
         UserBanList userbanlist = player.getServer().getPlayerList().getBans();
         GameProfile gameprofile = player.getGameProfile();
@@ -63,7 +78,7 @@ public class TrimAbilities {
         commandSourceStack.sendSuccess(
                 () -> Component.translatable("commands.ban.success", Component.literal(gameprofile.getName()), userbanlistentry.getReason()), true
         );
-        player.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
+        player.connection.disconnect(DEATH_BAN_MESSAGE);
     }
 
     public static void onClone(ServerPlayer originalPlayer, ServerPlayer newPlayer, boolean alive) {

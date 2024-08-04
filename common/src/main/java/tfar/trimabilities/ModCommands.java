@@ -5,16 +5,20 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.server.commands.BanPlayerCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.BanListEntry;
+import net.minecraft.server.players.StoredUserEntry;
+import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -25,6 +29,7 @@ import tfar.trimabilities.init.ModItems;
 import tfar.trimabilities.platform.Services;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class ModCommands {
@@ -59,6 +64,14 @@ public class ModCommands {
                         .then(Commands.literal("list").executes(ModCommands::deathbanList)
                         )
                 )
+
+                .then(Commands.literal("revive")
+                        .then(Commands.argument("targets", GameProfileArgument.gameProfile())
+                                .suggests(suggest)
+                                .executes(ModCommands::revivePlayers)
+                        )
+                )
+
                 .then(Commands.literal("reset")
                         .executes(ModCommands::powerReset)
                 )
@@ -142,12 +155,26 @@ public class ModCommands {
         return 1;
     }
 
-    public static final MutableComponent DEATHBAN = Component.literal("deathban");
+    public static final MutableComponent DEATHBAN = Component.literal("deathbanned");
 
     public static int deathbanManual(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Collection<GameProfile> targets = GameProfileArgument.getGameProfiles(ctx, "targets");
-        BanPlayerCommands.banPlayers(ctx.getSource(), targets, DEATHBAN);
+        banPlayersCustomMessage(ctx.getSource(), targets, DEATHBAN, TrimAbilities.DEATH_BAN_MESSAGE);
         return targets.size();
+    }
+
+    public static final SuggestionProvider<CommandSourceStack> suggest = (context, builder) -> {
+        Collection<String> pBannedPlayerList = context.getSource().getServer().getPlayerList().getBans().getEntries().stream()
+                .filter(userBanListEntry -> DEATHBAN.getString().equals(userBanListEntry.getReason())).map(StoredUserEntry::getUser)
+                .filter(Objects::nonNull).map(GameProfile::getName).toList();
+
+
+        return SharedSuggestionProvider.suggest(pBannedPlayerList, builder);
+    };
+
+    public static int revivePlayers(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Collection<GameProfile> targets = GameProfileArgument.getGameProfiles(ctx, "targets");
+        return pardonDeathbanPlayers(ctx.getSource(),targets);
     }
 
     public static int deathbanList(CommandContext<CommandSourceStack> ctx) {
@@ -169,6 +196,57 @@ public class ModCommands {
 
         return pBannedPlayerList.size();
     }
+
+    private static final SimpleCommandExceptionType ERROR_NOT_BANNED = new SimpleCommandExceptionType(Component.translatable("commands.pardon.failed"));
+
+    private static int pardonDeathbanPlayers(CommandSourceStack pSource, Collection<GameProfile> pGameProfiles) throws CommandSyntaxException {
+        UserBanList userbanlist = pSource.getServer().getPlayerList().getBans();
+        int i = 0;
+
+        for (GameProfile gameprofile : pGameProfiles) {
+            UserBanListEntry userBanListEntry = userbanlist.get(gameprofile);
+            if (userBanListEntry != null) {
+                if (TrimAbilities.DEATH_BAN_MESSAGE.getString().equals(userBanListEntry.getReason())) {
+                    userbanlist.remove(gameprofile);
+                    i++;
+                    pSource.sendSuccess(() -> Component.translatable("commands.pardon.success", Component.literal(gameprofile.getName())), true);
+                } else {
+                    pSource.sendFailure(Component.literal("Player is regular banned, not deathbanned"));
+                }
+            }
+        }
+
+        if (i == 0) {
+            throw ERROR_NOT_BANNED.create();
+        } else {
+            return i;
+        }
+    }
+
+
+    public static int banPlayersCustomMessage(CommandSourceStack pSource, Collection<GameProfile> pGameProfiles, Component pReason, Component message) throws CommandSyntaxException {
+        UserBanList userbanlist = pSource.getServer().getPlayerList().getBans();
+        int i = 0;
+
+        for (GameProfile gameprofile : pGameProfiles) {
+            if (!userbanlist.isBanned(gameprofile)) {
+                UserBanListEntry userbanlistentry = new UserBanListEntry(
+                        gameprofile, null, pSource.getTextName(), null, pReason == null ? null : pReason.getString()
+                );
+                userbanlist.add(userbanlistentry);
+                i++;
+                pSource.sendSuccess(
+                        () -> Component.translatable("commands.ban.success", Component.literal(gameprofile.getName()), userbanlistentry.getReason()), true
+                );
+                ServerPlayer serverplayer = pSource.getServer().getPlayerList().getPlayer(gameprofile.getId());
+                if (serverplayer != null) {
+                    serverplayer.connection.disconnect(message);
+                }
+            }
+        }
+        return 1;
+    }
+
 
     public static int powerReset(CommandContext<CommandSourceStack> ctx) {
         ctx.getSource().getServer().getPlayerList().getPlayers().forEach(player -> PlayerDuck.of(player).setTrimPower(0));

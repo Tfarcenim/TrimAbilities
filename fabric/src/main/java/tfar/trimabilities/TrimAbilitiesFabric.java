@@ -22,6 +22,7 @@ public class TrimAbilitiesFabric implements ModInitializer {
         ServerLivingEntityEvents.AFTER_DEATH.register(TrimAbilities::onDeath);
         ServerPlayerEvents.COPY_FROM.register(TrimAbilities::onClone);
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ModCommands.register(dispatcher));
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> TrimAbilities.onLogin(handler.player));
         UseItemCallback.EVENT.register((player, world, hand) -> {
             ItemStack stack = player.getItemInHand(hand);
             if (world.isClientSide) return InteractionResultHolder.pass(stack);
