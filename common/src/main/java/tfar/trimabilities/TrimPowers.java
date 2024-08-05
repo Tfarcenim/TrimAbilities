@@ -18,6 +18,12 @@ import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SplashPotionItem;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.item.armortrim.TrimPatterns;
@@ -65,8 +71,13 @@ public class TrimPowers {
                 }
             }
         }));
-        EYE = register(get(registryAccess,TrimPatterns.EYE),new TrimPower(0,TrimTier.A,createTempEffect(MobEffects.REGENERATION,200,0),player -> {
-
+        EYE = register(get(registryAccess,TrimPatterns.EYE),new TrimPower(20 * 20,TrimTier.A,createTempEffect(MobEffects.REGENERATION,200,0),player -> {
+            Level level = player.level();
+            ThrownPotion thrownpotion = new ThrownPotion(level, player);
+            ItemStack stack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.STRONG_HEALING);
+            thrownpotion.setItem(stack);
+            thrownpotion.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.5F, 1.0F);
+            level.addFreshEntity(thrownpotion);
         }));
     }
 

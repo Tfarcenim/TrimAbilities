@@ -195,7 +195,19 @@ public class ModCommands {
         return 1;
     }
 
-    public static int useAbility2(CommandContext<CommandSourceStack> ctx) {
+    public static int useAbility2(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        EquipmentSlot slot = playerDuck.getAbility2();
+        ItemStack stack = player.getItemBySlot(slot);
+        ArmorTrim armorTrim = stack.get(DataComponents.TRIM);
+        if (armorTrim != null) {
+            Holder<TrimPattern> trimPattern = armorTrim.pattern();
+            TrimPower trimPower = TrimPowers.TRIM_MAP.get(trimPattern);
+            if (trimPower != null) {
+                trimPower.activateAbility(player,slot);
+            }
+        }
         return 1;
     }
 

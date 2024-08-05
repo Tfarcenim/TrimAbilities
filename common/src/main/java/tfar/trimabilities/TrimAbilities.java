@@ -150,7 +150,7 @@ public class TrimAbilities {
 
                 Integer ticks = playerDuck.getCooldowns().get(slot1);
                 if (ticks != null && ticks > 0) {
-                    String sec = String.format("%.1f", ticks/20d);
+                    String sec = String.format("%.0f", ticks/20d);
                     component.append(sec);
                 } else {
                     component.append("0");
@@ -174,7 +174,7 @@ public class TrimAbilities {
 
                 Integer ticks = playerDuck.getCooldowns().get(slot2);
                 if (ticks != null && ticks > 0) {
-                    String sec = String.format("%.1f", ticks/20d);
+                    String sec = String.format("%.0f", ticks/20d);
                     component.append(sec);
                 } else {
                     component.append("0");
