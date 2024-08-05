@@ -12,6 +12,9 @@ public class ModItems {
 
     public static final ItemStack TRIM_POWER = createTrimPower();
     public static final ItemStack REVIVE_HEAD = createReviveHead();
+    public static final ItemStack YES = yes();
+    public static final ItemStack NO = no();
+
 
     public static ItemStack createTrimPower() {
         ItemStack trimPoint = new ItemStack(Items.BLACK_DYE);
@@ -28,6 +31,18 @@ public class ModItems {
         trimPoint.set(DataComponents.RARITY, Rarity.RARE);
         trimPoint.set(DataComponents.CUSTOM_NAME, Component.literal("Revive Head").setStyle(Style.EMPTY.withItalic(false)));
         return trimPoint;
+    }
+
+    public static ItemStack yes() {
+        ItemStack yes = new ItemStack(Items.GREEN_STAINED_GLASS_PANE);
+        yes.set(DataComponents.CUSTOM_NAME,Component.literal("Enabled").setStyle(Style.EMPTY.withItalic(false)));
+        return yes;
+    }
+
+    public static ItemStack no() {
+        ItemStack yes = new ItemStack(Items.RED_STAINED_GLASS_PANE);
+        yes.set(DataComponents.CUSTOM_NAME,Component.literal("Disabled").setStyle(Style.EMPTY.withItalic(false)));
+        return yes;
     }
 
 }

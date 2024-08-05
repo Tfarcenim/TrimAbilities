@@ -8,21 +8,26 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 public class TrimPower {
-    protected final int[] cooldowns;
+    protected final int cooldown;
     private final TrimTier tier;
+    private final MobEffectInstance mobEffectInstance;
 
 
-    public TrimPower(int[] cooldowns,TrimTier tier) {
-        this.cooldowns = cooldowns;
+    public TrimPower(int cooldown,TrimTier tier,MobEffectInstance mobEffectInstance) {
+        this.cooldown = cooldown;
         this.tier = tier;
+        this.mobEffectInstance = mobEffectInstance;
     }
 
 
     public void applyPassiveEffects(Player player) {
-
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        if (playerDuck.getTrimPower() > tier.passive) {
+            player.addEffect(new MobEffectInstance(mobEffectInstance));
+        }
     }
 
-    public void onEPChange(ServerPlayer player,int oldEP,int newEP) {
+    public void activateAbility(Player player) {
 
     }
 

@@ -24,6 +24,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import tfar.trimabilities.init.ModItems;
 import tfar.trimabilities.platform.Services;
@@ -90,6 +91,16 @@ public class ModCommands {
                         .executes(ModCommands::powerWithdraw)
                 )
         );
+
+        dispatcher.register(Commands.literal("ability")
+                .executes(ModCommands::useAbility1)
+        );
+        dispatcher.register(Commands.literal("ability2")
+                .executes(ModCommands::useAbility2)
+        );
+        dispatcher.register(Commands.literal("changeability")
+                .executes(ModCommands::changeAbility)
+        );
     }
 
 
@@ -115,6 +126,15 @@ public class ModCommands {
         playSound(player);
         spawnWitchParticles(player);
         return 1;
+    }
+
+    public static int changeAbility(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        return 1;
+    }
+
+    public static int useAbility1(CommandContext<CommandSourceStack> ctx) {
+
     }
 
     protected static void playSound(ServerPlayer player) {
@@ -174,7 +194,7 @@ public class ModCommands {
 
     public static int revivePlayers(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Collection<GameProfile> targets = GameProfileArgument.getGameProfiles(ctx, "targets");
-        return pardonDeathbanPlayers(ctx.getSource(),targets);
+        return pardonDeathbanPlayers(ctx.getSource(), targets);
     }
 
     public static int deathbanList(CommandContext<CommandSourceStack> ctx) {

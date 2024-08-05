@@ -3,16 +3,22 @@ package tfar.trimabilities;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.armortrim.ArmorTrim;
+import net.minecraft.world.item.armortrim.TrimPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tfar.trimabilities.init.ModItems;
@@ -81,12 +87,107 @@ public class TrimAbilities {
         player.connection.disconnect(DEATH_BAN_MESSAGE);
     }
 
+    public static final EquipmentSlot[] armor = new EquipmentSlot[]{EquipmentSlot.HEAD,EquipmentSlot.CHEST,EquipmentSlot.LEGS,EquipmentSlot.FEET};
+
     public static void onClone(ServerPlayer originalPlayer, ServerPlayer newPlayer, boolean alive) {
-        PlayerDuck.of(originalPlayer).copyTo(newPlayer);
+        PlayerDuck oldPlayerDuck = PlayerDuck.of(originalPlayer);
+        PlayerDuck newPlayerDuck = PlayerDuck.of(newPlayer);
+        newPlayerDuck.setTrimPowerNoUpdate(oldPlayerDuck.getTrimPower());
+
+        newPlayerDuck.setAbility1(oldPlayerDuck.getAbility1());
+        newPlayerDuck.setAbility2(oldPlayerDuck.getAbility2());
+
     }
+
+    public static ArmorTrim getTrim(ItemStack stack) {
+        return stack.get(DataComponents.TRIM);
+    }
+
 
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 
+
+    public static void playerTick(ServerPlayer player) {
+        boolean clientDirty = false;
+        if (player.tickCount % 100 == 0) {
+            PlayerDuck playerDuck = PlayerDuck.of(player);
+            for (EquipmentSlot equipmentSlot : armor) {
+                ItemStack stack = player.getItemBySlot(equipmentSlot);
+                Integer value = playerDuck.getCooldowns().get(equipmentSlot);
+                if (value != null && value > 0) {
+                    value--;
+                    playerDuck.getCooldowns().put(equipmentSlot,value);
+                    clientDirty = true;
+                }
+                ArmorTrim armorTrim = getTrim(stack);
+                if (armorTrim != null) {
+                    Holder<TrimPattern> pattern = armorTrim.pattern();
+                    TrimPower trimPower = TrimPowers.TRIM_MAP.get(pattern);
+                    if (trimPower != null) {
+                        trimPower.applyPassiveEffects(player);
+                    }
+                }
+            }
+
+            if (clientDirty) {
+                MutableComponent component = Component.empty();
+                EquipmentSlot slot1 = playerDuck.getAbility1();
+
+                if (slot1 != null) {
+                    ItemStack stack = player.getItemBySlot(slot1);
+                    ArmorTrim armorTrim = getTrim(stack);
+                    if (armorTrim != null) {
+                        Holder<TrimPattern> pattern = armorTrim.pattern();
+                        component.append(pattern.getRegisteredName());
+                    } else {
+                        component.append("Empty");
+                    }
+                    component.append(": ");
+
+                    Integer ticks = playerDuck.getCooldowns().get(slot1);
+                    if (ticks != null && ticks > 0) {
+                        String sec = String.format("%.1f", ticks/20d);
+                        component.append(sec);
+                    } else {
+                        component.append("0");
+                    }
+
+                    component.append(" | ");
+                }
+
+                EquipmentSlot slot2 = playerDuck.getAbility1();
+                if (slot2 != null) {
+                    ItemStack stack = player.getItemBySlot(slot2);
+                    ArmorTrim armorTrim = getTrim(stack);
+                    if (armorTrim != null) {
+                        Holder<TrimPattern> pattern = armorTrim.pattern();
+                        component.append(pattern.getRegisteredName());
+                    } else {
+                        component.append("Empty");
+                    }
+
+                    component.append(": ");
+
+                    Integer ticks = playerDuck.getCooldowns().get(slot1);
+                    if (ticks != null && ticks > 0) {
+                        String sec = String.format("%.1f", ticks/20d);
+                        component.append(sec);
+                    } else {
+                        component.append("0");
+                    }
+                }
+
+                player.displayClientMessage(component,true);
+            }
+
+        }
+    }
+
+    //[ABILITY 1 TRIM NAME]: [SECONDS] | [ABILITY 2 TRIM NAME]: [SECONDS]
+
+    public static void onServerStarted(MinecraftServer server) {
+        TrimPowers.registerPowers(server);
+    }
 }

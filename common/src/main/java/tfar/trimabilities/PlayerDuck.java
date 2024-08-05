@@ -1,6 +1,11 @@
 package tfar.trimabilities;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public interface PlayerDuck {
 
@@ -11,26 +16,17 @@ public interface PlayerDuck {
         setTrimPower(getTrimPower() + points);
     }
 
-    int[] getCooldowns();
+    EnumMap<EquipmentSlot,Integer> getCooldowns();
+    EquipmentSlot getAbility1();
+    EquipmentSlot getAbility2();
+
+    void setAbility1(EquipmentSlot ability1);
+    void setAbility2(EquipmentSlot ability2);
 
     default void copyTo(Player newPlayer) {
-        PlayerDuck newPlayerDuck = of(newPlayer);
-        newPlayerDuck.setTrimPowerNoUpdate(getTrimPower());
+
     }
 
-    default void tickServer() {
-        boolean clientDirty = false;
-        int[] cooldowns = getCooldowns();
-        for (int i = 0; i < cooldowns.length;i++) {
-            if (cooldowns[i] > 0) {
-                cooldowns[i]--;
-                clientDirty = true;
-            }
-        }
-        if (clientDirty) {
-
-        }
-    }
 
     static PlayerDuck of(Player player) {
         return (PlayerDuck) player;

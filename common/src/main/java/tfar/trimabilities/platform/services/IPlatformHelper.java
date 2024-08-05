@@ -1,6 +1,7 @@
 package tfar.trimabilities.platform.services;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 import tfar.trimabilities.platform.MLConfig;
 
 public interface IPlatformHelper {
@@ -40,4 +41,7 @@ public interface IPlatformHelper {
     MLConfig getConfig();
 
     boolean checkBasicPermission(CommandSourceStack commandSourceStack, String node, int defaultValue);
+
+    void openAbilityScreen(ServerPlayer player);
+
 }
