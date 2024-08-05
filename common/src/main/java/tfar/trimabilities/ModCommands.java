@@ -130,11 +130,16 @@ public class ModCommands {
 
     public static int changeAbility(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
+        Services.PLATFORM.openAbilityScreen(player);
         return 1;
     }
 
     public static int useAbility1(CommandContext<CommandSourceStack> ctx) {
+        return 1;
+    }
 
+    public static int useAbility2(CommandContext<CommandSourceStack> ctx) {
+        return 1;
     }
 
     protected static void playSound(ServerPlayer player) {
