@@ -5,6 +5,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -111,16 +112,16 @@ public class TrimAbilities {
 
     public static void playerTick(ServerPlayer player) {
         boolean clientDirty = false;
-        if (player.tickCount % 100 == 0) {
-            PlayerDuck playerDuck = PlayerDuck.of(player);
-            for (EquipmentSlot equipmentSlot : armor) {
-                ItemStack stack = player.getItemBySlot(equipmentSlot);
-                Integer value = playerDuck.getCooldowns().get(equipmentSlot);
-                if (value != null && value > 0) {
-                    value--;
-                    playerDuck.getCooldowns().put(equipmentSlot,value);
-                    clientDirty = true;
-                }
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        for (EquipmentSlot equipmentSlot : armor) {
+            ItemStack stack = player.getItemBySlot(equipmentSlot);
+            Integer value = playerDuck.getCooldowns().get(equipmentSlot);
+            if (value != null && value > 0) {
+                value--;
+                playerDuck.getCooldowns().put(equipmentSlot, value);
+                clientDirty = true;
+            }
+            if (player.tickCount % 100 == 0) {
                 ArmorTrim armorTrim = getTrim(stack);
                 if (armorTrim != null) {
                     Holder<TrimPattern> pattern = armorTrim.pattern();
@@ -130,59 +131,59 @@ public class TrimAbilities {
                     }
                 }
             }
+        }
 
-            if (clientDirty) {
-                MutableComponent component = Component.empty();
-                EquipmentSlot slot1 = playerDuck.getAbility1();
+        if (clientDirty) {
+            MutableComponent component = Component.empty();
+            EquipmentSlot slot1 = playerDuck.getAbility1();
 
-                if (slot1 != null) {
-                    ItemStack stack = player.getItemBySlot(slot1);
-                    ArmorTrim armorTrim = getTrim(stack);
-                    if (armorTrim != null) {
-                        Holder<TrimPattern> pattern = armorTrim.pattern();
-                        component.append(pattern.getRegisteredName());
-                    } else {
-                        component.append("Empty");
-                    }
-                    component.append(": ");
+            if (slot1 != null) {
+                ItemStack stack = player.getItemBySlot(slot1);
+                ArmorTrim armorTrim = getTrim(stack);
+                if (armorTrim != null) {
+                    Holder<TrimPattern> pattern = armorTrim.pattern();
+                    component.append(CommonComponents.space().append(pattern.value().copyWithStyle(armorTrim.material())));
+                } else {
+                    component.append("Empty");
+                }
+                component.append(": ");
 
-                    Integer ticks = playerDuck.getCooldowns().get(slot1);
-                    if (ticks != null && ticks > 0) {
-                        String sec = String.format("%.1f", ticks/20d);
-                        component.append(sec);
-                    } else {
-                        component.append("0");
-                    }
-
-                    component.append(" | ");
+                Integer ticks = playerDuck.getCooldowns().get(slot1);
+                if (ticks != null && ticks > 0) {
+                    String sec = String.format("%.1f", ticks/20d);
+                    component.append(sec);
+                } else {
+                    component.append("0");
                 }
 
-                EquipmentSlot slot2 = playerDuck.getAbility1();
-                if (slot2 != null) {
-                    ItemStack stack = player.getItemBySlot(slot2);
-                    ArmorTrim armorTrim = getTrim(stack);
-                    if (armorTrim != null) {
-                        Holder<TrimPattern> pattern = armorTrim.pattern();
-                        component.append(pattern.getRegisteredName());
-                    } else {
-                        component.append("Empty");
-                    }
-
-                    component.append(": ");
-
-                    Integer ticks = playerDuck.getCooldowns().get(slot1);
-                    if (ticks != null && ticks > 0) {
-                        String sec = String.format("%.1f", ticks/20d);
-                        component.append(sec);
-                    } else {
-                        component.append("0");
-                    }
-                }
-
-                player.displayClientMessage(component,true);
+                component.append(" | ");
             }
 
+            EquipmentSlot slot2 = playerDuck.getAbility2();
+            if (slot2 != null) {
+                ItemStack stack = player.getItemBySlot(slot2);
+                ArmorTrim armorTrim = getTrim(stack);
+                if (armorTrim != null) {
+                    Holder<TrimPattern> pattern = armorTrim.pattern();
+                    component.append(CommonComponents.space().append(pattern.value().copyWithStyle(armorTrim.material())));
+                } else {
+                    component.append("Empty");
+                }
+
+                component.append(": ");
+
+                Integer ticks = playerDuck.getCooldowns().get(slot2);
+                if (ticks != null && ticks > 0) {
+                    String sec = String.format("%.1f", ticks/20d);
+                    component.append(sec);
+                } else {
+                    component.append("0");
+                }
+            }
+
+            player.displayClientMessage(component,true);
         }
+
     }
 
     //[ABILITY 1 TRIM NAME]: [SECONDS] | [ABILITY 2 TRIM NAME]: [SECONDS]

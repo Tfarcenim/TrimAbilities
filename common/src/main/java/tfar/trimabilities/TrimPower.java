@@ -4,19 +4,25 @@ import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+
+import java.util.EnumMap;
+import java.util.function.Consumer;
 
 public class TrimPower {
     protected final int cooldown;
     private final TrimTier tier;
     private final MobEffectInstance mobEffectInstance;
+    private final Consumer<Player> consumer;
 
 
-    public TrimPower(int cooldown,TrimTier tier,MobEffectInstance mobEffectInstance) {
+    public TrimPower(int cooldown, TrimTier tier, MobEffectInstance mobEffectInstance, Consumer<Player> consumer) {
         this.cooldown = cooldown;
         this.tier = tier;
         this.mobEffectInstance = mobEffectInstance;
+        this.consumer = consumer;
     }
 
 
@@ -27,8 +33,16 @@ public class TrimPower {
         }
     }
 
-    public void activateAbility(Player player) {
-
+    public void activateAbility(Player player, EquipmentSlot slot) {
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        if (playerDuck.getTrimPower() > tier.active) {
+            EnumMap<EquipmentSlot,Integer> cooldowns = playerDuck.getCooldowns();
+            Integer cooldown = cooldowns.get(slot);
+            if (cooldown == null || cooldown <=0 ) {
+                consumer.accept(player);
+                cooldowns.put(slot,this.cooldown);
+            }
+        }
     }
 
     protected static boolean addMobEffect(Player player, Holder<MobEffect> mobEffect, int amplifier) {
@@ -42,4 +56,5 @@ public class TrimPower {
     protected void playSound(ServerPlayer player) {
        // player.playNotifySound(ElixirSMPS2.ABILITY_USED, SoundSource.PLAYERS,1,1);
     }
+
 }

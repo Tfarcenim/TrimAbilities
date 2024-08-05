@@ -3,6 +3,7 @@ package tfar.trimabilities;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -12,6 +13,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -23,12 +26,15 @@ import net.minecraft.server.players.UserBanListEntry;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.armortrim.ArmorTrim;
+import net.minecraft.world.item.armortrim.TrimPattern;
 import tfar.trimabilities.init.ModItems;
 import tfar.trimabilities.platform.Services;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -92,14 +98,24 @@ public class ModCommands {
                 )
         );
 
-        dispatcher.register(Commands.literal("ability")
+        dispatcher.register(Commands.literal("ability1")
                 .executes(ModCommands::useAbility1)
         );
         dispatcher.register(Commands.literal("ability2")
                 .executes(ModCommands::useAbility2)
         );
-        dispatcher.register(Commands.literal("changeability")
+        /*dispatcher.register(Commands.literal("changeability")
                 .executes(ModCommands::changeAbility)
+        );*/
+        dispatcher.register(Commands.literal("changeability1")
+                .then(Commands.argument("slot", StringArgumentType.string()).suggests(suggest_slot)
+                        .executes(ModCommands::changeAbility1)
+                )
+        );
+        dispatcher.register(Commands.literal("changeability2")
+                .then(Commands.argument("slot", StringArgumentType.string()).suggests(suggest_slot)
+                        .executes(ModCommands::changeAbility2)
+                )
         );
     }
 
@@ -130,11 +146,52 @@ public class ModCommands {
 
     public static int changeAbility(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        Services.PLATFORM.openAbilityScreen(player);
         return 1;
     }
 
-    public static int useAbility1(CommandContext<CommandSourceStack> ctx) {
+    public static int changeAbility1(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        String s = StringArgumentType.getString(ctx,"slot");
+        EquipmentSlot slot = EquipmentSlot.byName(s);
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        if (slot != playerDuck.getAbility2()) {
+            playerDuck.setAbility1(slot);
+            ctx.getSource().sendSuccess(() -> Component.literal("Assigned ability 1 to "+slot+" slot"),false);
+            return 1;
+        } else {
+            ctx.getSource().sendFailure(Component.literal("Cannot assign same slot as ability 2"));
+            return 0;
+        }
+    }
+
+    public static int changeAbility2(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        String s = StringArgumentType.getString(ctx,"slot");
+        EquipmentSlot slot = EquipmentSlot.byName(s);
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        if (slot != playerDuck.getAbility1()) {
+            playerDuck.setAbility2(slot);
+            ctx.getSource().sendSuccess(() -> Component.literal("Assigned ability 2 to "+slot+" slot"),false);
+            return 1;
+        } else {
+            ctx.getSource().sendFailure(Component.literal("Cannot assign same slot as ability 1"));
+            return 0;
+        }
+    }
+
+    public static int useAbility1(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        EquipmentSlot slot = playerDuck.getAbility1();
+        ItemStack stack = player.getItemBySlot(slot);
+        ArmorTrim armorTrim = stack.get(DataComponents.TRIM);
+        if (armorTrim != null) {
+            Holder<TrimPattern> trimPattern = armorTrim.pattern();
+            TrimPower trimPower = TrimPowers.TRIM_MAP.get(trimPattern);
+            if (trimPower != null) {
+                trimPower.activateAbility(player,slot);
+            }
+        }
         return 1;
     }
 
@@ -195,6 +252,11 @@ public class ModCommands {
 
 
         return SharedSuggestionProvider.suggest(pBannedPlayerList, builder);
+    };
+
+    public static final SuggestionProvider<CommandSourceStack> suggest_slot = (context, builder) -> {
+        Collection<String> strings = Arrays.stream(TrimAbilities.armor).map(EquipmentSlot::getName).toList();
+        return SharedSuggestionProvider.suggest(strings, builder);
     };
 
     public static int revivePlayers(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

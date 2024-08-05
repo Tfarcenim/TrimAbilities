@@ -2,16 +2,27 @@ package tfar.trimabilities;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityAttachment;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.item.armortrim.TrimPatterns;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,8 +42,32 @@ public class TrimPowers {
         TRIM_MAP.clear();
         TRIM_POWER_LIST.clear();
         HolderLookup.Provider registryAccess = server.registryAccess();
-        SILENCE = register(get(registryAccess,TrimPatterns.SILENCE), new TrimPower(0,TrimTier.A,createTempEffect(MobEffects.DAMAGE_RESISTANCE,200,0)));
-        EYE = register(get(registryAccess,TrimPatterns.EYE),new TrimPower(0,TrimTier.A,createTempEffect(MobEffects.REGENERATION,200,0)));
+        SILENCE = register(get(registryAccess,TrimPatterns.SILENCE), new TrimPower(90 * 20,TrimTier.A,createTempEffect(MobEffects.DAMAGE_RESISTANCE,200,0),player -> {
+            TargetingConditions conditions = TargetingConditions.forCombat();
+            Level level = player.level();
+            List<LivingEntity> nearby = level.getNearbyEntities(LivingEntity.class,conditions,player,player.getBoundingBox().inflate(40));
+            for (LivingEntity living : nearby) {
+                Vec3 vec3 = player.position();
+                Vec3 vec31 = living.getEyePosition().subtract(vec3);
+                Vec3 vec32 = vec31.normalize();
+                int i = Mth.floor(vec31.length()) + 7;
+
+                for (int j = 1; j < i; j++) {
+                    Vec3 vec33 = vec3.add(vec32.scale(j));
+                    ((ServerLevel) level).sendParticles(ParticleTypes.SONIC_BOOM, vec33.x, vec33.y, vec33.z, 1, 0.0, 0.0, 0.0, 0.0);
+                }
+
+                level.playSound(null,player.getX(),player.getY(),player.getZ(),SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS,3.0F, 1.0F);
+                if (living.hurt(level.damageSources().sonicBoom(player), 10.0F)) {
+                    double d1 = 0.5 * (1.0 - living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+                    double d0 = 2.5 * (1.0 - living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+                    living.push(vec32.x() * d0, vec32.y() * d1, vec32.z() * d0);
+                }
+            }
+        }));
+        EYE = register(get(registryAccess,TrimPatterns.EYE),new TrimPower(0,TrimTier.A,createTempEffect(MobEffects.REGENERATION,200,0),player -> {
+
+        }));
     }
 
     public static Holder<TrimPattern> get(HolderLookup.Provider access, ResourceKey<TrimPattern> key) {
