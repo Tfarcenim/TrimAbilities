@@ -36,6 +36,10 @@ public class TrimPower {
         }
     }
 
+    public void applySetBonus(Player player,int pieces) {
+        
+    }
+
     public void activateAbility(Player player, EquipmentSlot slot) {
         PlayerDuck playerDuck = PlayerDuck.of(player);
         if (playerDuck.getTrimPower() > tier.active) {

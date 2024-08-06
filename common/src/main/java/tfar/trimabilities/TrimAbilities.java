@@ -143,15 +143,12 @@ public class TrimAbilities {
         }
 
         if (player.tickCount % 100 == 0) {
-            Holder<TrimPattern> wardPattern = TrimPowers.get(player.level().registryAccess(),TrimPatterns.WARD);
-            int wardcount = patternCount.getInt(wardPattern);
-            TrimPower trimPower = TrimPowers.WARD;
-            if (playerDuck.getTrimPower() > trimPower.tier.passive) {
-                if (wardcount == 1) {
-                    player.addEffect(TrimPowers.createTempEffect(MobEffects.HEALTH_BOOST,200,0));
-                }
-                if (wardcount > 1) {
-                    player.addEffect(TrimPowers.createTempEffect(MobEffects.HEALTH_BOOST,200,1));
+            for (Object2IntMap.Entry<Holder<TrimPattern>> entry : patternCount.object2IntEntrySet() ) {
+                Holder<TrimPattern> wardPattern = entry.getKey();
+                int count = entry.getIntValue();
+                TrimPower trimPower = TrimPowers.TRIM_MAP.get(wardPattern);
+                if (trimPower != null) {
+                    trimPower.applySetBonus(player,count);
                 }
             }
         }

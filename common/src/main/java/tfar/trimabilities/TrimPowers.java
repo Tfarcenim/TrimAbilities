@@ -1,7 +1,9 @@
 package tfar.trimabilities;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -11,13 +13,15 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Unit;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -26,9 +30,11 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.item.armortrim.TrimPatterns;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import tfar.trimabilities.trimpower.TrimPower;
-import tfar.trimabilities.trimpower.WardTrimPower;
+import tfar.trimabilities.trimpower.SetBonusTrimPower;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +50,10 @@ public class TrimPowers {
     public static TrimPower EYE;
     public static TrimPower WARD;
     public static TrimPower DUNE;
-
+    public static TrimPower SENTRY;
+    public static TrimPower SHAPER;
+    public static TrimPower TIDE;
+    public static TrimPower VEX;
 
     public static void registerPowers(MinecraftServer server) {
         TRIM_MAP.clear();
@@ -81,7 +90,7 @@ public class TrimPowers {
             thrownpotion.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.5F, 1.0F);
             level.addFreshEntity(thrownpotion);
         }));
-        WARD = register(get(registryAccess,TrimPatterns.WARD),new WardTrimPower(60 * 20,TrimTier.A, player -> {
+        WARD = register(get(registryAccess,TrimPatterns.WARD),new SetBonusTrimPower(60 * 20,TrimTier.A, player -> {
             TargetingConditions conditions = TargetingConditions.forCombat();
             Level level = player.level();
             List<LivingEntity> nearby = level.getNearbyEntities(LivingEntity.class,conditions,player,player.getBoundingBox().inflate(16));
@@ -89,10 +98,61 @@ public class TrimPowers {
                 Vec3 dir = player.position().subtract(living.position()).normalize().scale(5);
                 push(living,dir);
             }
-        }));
+        },MobEffects.HEALTH_BOOST));
         DUNE = register(get(registryAccess,TrimPatterns.DUNE),new TrimPower(60 * 20,TrimTier.B,createTempEffect(MobEffects.DIG_SPEED,200,1), player -> {
             player.addEffect(createTempEffect(MobEffects.DIG_SPEED,200,5));
         }));
+        SENTRY = register(get(registryAccess,TrimPatterns.SENTRY),new SetBonusTrimPower(60 * 20,TrimTier.B,player -> {
+            int arrows = 8;
+
+            for (int i = 0; i < arrows;i++) {
+                double angle = i * 360d / arrows;
+                double radians = angle * Math.PI / 180;
+                double sin = Math.sin(radians);
+                double cos = Math.cos(radians);
+                ItemStack arrowStack = new ItemStack(Items.ARROW);
+                arrowStack.set(DataComponents.INTANGIBLE_PROJECTILE, Unit.INSTANCE);
+                Arrow arrow = new Arrow(player.level(),player,arrowStack,null);
+                arrow.setBaseDamage(4);
+                arrow.shoot(cos,0.1,sin,1,0);
+                player.level().playSound(null,player.blockPosition(),SoundEvents.SKELETON_SHOOT,SoundSource.PLAYERS, 1.0F, 1.0F / (player.getRandom().nextFloat() * 0.4F + 0.8F));
+                player.level().addFreshEntity(arrow);
+            }
+
+        },MobEffects.DAMAGE_BOOST));
+
+        SHAPER = register(get(registryAccess,TrimPatterns.SHAPER),new SetBonusTrimPower(60 * 20,TrimTier.B,player -> {
+            player.addEffect(createTempEffect(MobEffects.MOVEMENT_SPEED,200,4));
+        },MobEffects.MOVEMENT_SPEED));
+        TIDE = register(get(registryAccess,TrimPatterns.TIDE),new TrimPower(60 * 20,TrimTier.B,createTempEffect(MobEffects.DOLPHINS_GRACE,200,0),player -> {
+            float f = 3;
+            float f7 = player.getYRot();
+            float f1 = player.getXRot();
+            float f2 = -Mth.sin(f7 * (float) (Math.PI / 180.0)) * Mth.cos(f1 * (float) (Math.PI / 180.0));
+            float f3 = -Mth.sin(f1 * (float) (Math.PI / 180.0));
+            float f4 = Mth.cos(f7 * (float) (Math.PI / 180.0)) * Mth.cos(f1 * (float) (Math.PI / 180.0));
+            float f5 = Mth.sqrt(f2 * f2 + f3 * f3 + f4 * f4);
+            f2 *= f / f5;
+            f3 *= f / f5;
+            f4 *= f / f5;
+            player.push(f2, f3, f4);
+            player.startAutoSpinAttack(20, 8.0F, player.getMainHandItem());
+            if (player.onGround()) {
+                float f6 = 1.2F;
+                player.move(MoverType.SELF, new Vec3(0.0, f6, 0.0));
+            }
+            player.hurtMarked = true;
+        }
+        ));
+
+        VEX = register(get(registryAccess,TrimPatterns.VEX),new TrimPower(60 * 20,TrimTier.B,createTempEffect(MobEffects.INVISIBILITY,200,0),player -> {
+            HitResult pick = player.pick(10, 0, false);
+            if (pick instanceof BlockHitResult blockHitResult) {
+                BlockPos pos = blockHitResult.getBlockPos().above();
+                player.teleportTo(pos.getX(),pos.getY(),pos.getZ());
+            }
+        }
+        ));
 
     }
 
