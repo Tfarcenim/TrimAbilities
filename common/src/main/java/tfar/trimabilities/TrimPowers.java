@@ -14,21 +14,21 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SplashPotionItem;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.item.armortrim.TrimPatterns;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import tfar.trimabilities.trimpower.TrimPower;
+import tfar.trimabilities.trimpower.WardTrimPower;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +42,8 @@ public class TrimPowers {
 
     public static TrimPower SILENCE;
     public static TrimPower EYE;
+    public static TrimPower WARD;
+    public static TrimPower DUNE;
 
 
     public static void registerPowers(MinecraftServer server) {
@@ -79,6 +81,24 @@ public class TrimPowers {
             thrownpotion.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.5F, 1.0F);
             level.addFreshEntity(thrownpotion);
         }));
+        WARD = register(get(registryAccess,TrimPatterns.WARD),new WardTrimPower(60 * 20,TrimTier.A, player -> {
+            TargetingConditions conditions = TargetingConditions.forCombat();
+            Level level = player.level();
+            List<LivingEntity> nearby = level.getNearbyEntities(LivingEntity.class,conditions,player,player.getBoundingBox().inflate(16));
+            for (LivingEntity living : nearby) {
+                Vec3 dir = player.position().subtract(living.position()).normalize().scale(5);
+                push(living,dir);
+            }
+        }));
+        DUNE = register(get(registryAccess,TrimPatterns.DUNE),new TrimPower(60 * 20,TrimTier.B,createTempEffect(MobEffects.DIG_SPEED,200,1), player -> {
+            player.addEffect(createTempEffect(MobEffects.DIG_SPEED,200,5));
+        }));
+
+    }
+
+    protected static void push(LivingEntity living, Vec3 dir) {
+        living.setDeltaMovement(living.getDeltaMovement().subtract(dir));
+        living.hurtMarked = true;
     }
 
     public static Holder<TrimPattern> get(HolderLookup.Provider access, ResourceKey<TrimPattern> key) {

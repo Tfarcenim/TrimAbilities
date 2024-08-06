@@ -1,4 +1,4 @@
-package tfar.trimabilities;
+package tfar.trimabilities.trimpower;
 
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerPlayer;
@@ -7,15 +7,18 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import tfar.trimabilities.PlayerDuck;
+import tfar.trimabilities.TrimTier;
 
 import java.util.EnumMap;
 import java.util.function.Consumer;
 
 public class TrimPower {
     protected final int cooldown;
-    private final TrimTier tier;
+    public final TrimTier tier;
     private final MobEffectInstance mobEffectInstance;
     private final Consumer<Player> consumer;
+
 
 
     public TrimPower(int cooldown, TrimTier tier, MobEffectInstance mobEffectInstance, Consumer<Player> consumer) {

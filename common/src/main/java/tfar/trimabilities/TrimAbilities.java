@@ -1,6 +1,8 @@
 package tfar.trimabilities;
 
 import com.mojang.authlib.GameProfile;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
@@ -14,15 +16,18 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.armortrim.TrimPattern;
+import net.minecraft.world.item.armortrim.TrimPatterns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tfar.trimabilities.init.ModItems;
+import tfar.trimabilities.trimpower.TrimPower;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -113,6 +118,7 @@ public class TrimAbilities {
     public static void playerTick(ServerPlayer player) {
         boolean clientDirty = false;
         PlayerDuck playerDuck = PlayerDuck.of(player);
+        Object2IntMap<Holder<TrimPattern>> patternCount = new Object2IntOpenHashMap<>();
         for (EquipmentSlot equipmentSlot : armor) {
             ItemStack stack = player.getItemBySlot(equipmentSlot);
             Integer value = playerDuck.getCooldowns().get(equipmentSlot);
@@ -125,6 +131,9 @@ public class TrimAbilities {
                 ArmorTrim armorTrim = getTrim(stack);
                 if (armorTrim != null) {
                     Holder<TrimPattern> pattern = armorTrim.pattern();
+
+                    patternCount.put(pattern,patternCount.getInt(pattern) + 1);
+
                     TrimPower trimPower = TrimPowers.TRIM_MAP.get(pattern);
                     if (trimPower != null) {
                         trimPower.applyPassiveEffects(player);
@@ -133,7 +142,21 @@ public class TrimAbilities {
             }
         }
 
-        if (clientDirty) {
+        if (player.tickCount % 100 == 0) {
+            Holder<TrimPattern> wardPattern = TrimPowers.get(player.level().registryAccess(),TrimPatterns.WARD);
+            int wardcount = patternCount.getInt(wardPattern);
+            TrimPower trimPower = TrimPowers.WARD;
+            if (playerDuck.getTrimPower() > trimPower.tier.passive) {
+                if (wardcount == 1) {
+                    player.addEffect(TrimPowers.createTempEffect(MobEffects.HEALTH_BOOST,200,0));
+                }
+                if (wardcount > 1) {
+                    player.addEffect(TrimPowers.createTempEffect(MobEffects.HEALTH_BOOST,200,1));
+                }
+            }
+        }
+
+            if (clientDirty) {
             MutableComponent component = Component.empty();
             EquipmentSlot slot1 = playerDuck.getAbility1();
 

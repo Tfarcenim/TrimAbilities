@@ -33,6 +33,7 @@ import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.armortrim.TrimPattern;
 import tfar.trimabilities.init.ModItems;
 import tfar.trimabilities.platform.Services;
+import tfar.trimabilities.trimpower.TrimPower;
 
 import java.util.Arrays;
 import java.util.Collection;
