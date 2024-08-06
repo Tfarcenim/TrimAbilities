@@ -60,6 +60,7 @@ public class TrimPowers {
     public static TrimPower RIB;
     public static TrimPower BOLT;
     public static TrimPower FLOW;
+    public static TrimPower HOST;
 
     public static void registerPowers(MinecraftServer server) {
         TRIM_MAP.clear();
@@ -187,9 +188,12 @@ public class TrimPowers {
         }));
 
 
-        FLOW = register(get(registryAccess,TrimPatterns.FLOW),new TrimPower(60 * 20,TrimTier.C,null, player -> {
+        FLOW = register(get(registryAccess,TrimPatterns.FLOW),new TrimPower(60 * 20,TrimTier.C,createTempEffect(MobEffects.LUCK,200,1), player -> {
             PlayerDuck playerDuck = PlayerDuck.of(player);
             playerDuck.setFlowTimer(200);
+        }));
+
+        HOST = register(get(registryAccess,TrimPatterns.FLOW),new TrimPower(0 * 20,TrimTier.C,createTempEffect(MobEffects.BAD_OMEN,200,1), player -> {
         }));
 
     }
