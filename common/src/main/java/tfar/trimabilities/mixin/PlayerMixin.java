@@ -20,6 +20,8 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDuck {
 
     @Unique
     int trimPower;
+    @Unique
+    int flowTimer;
 
     @Unique
     EquipmentSlot ability1;
@@ -72,6 +74,16 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDuck {
     @Override
     public void setAbility2(EquipmentSlot ability2) {
         this.ability2 = ability2;
+    }
+
+    @Override
+    public int getFlowTimer() {
+        return flowTimer;
+    }
+
+    @Override
+    public void setFlowTimer(int flowTimer) {
+        this.flowTimer = flowTimer;
     }
 
     @Inject(method = "addAdditionalSaveData",at = @At("RETURN"))

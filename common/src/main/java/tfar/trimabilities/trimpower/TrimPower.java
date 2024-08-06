@@ -30,14 +30,16 @@ public class TrimPower {
 
 
     public void applyPassiveEffects(Player player) {
-        PlayerDuck playerDuck = PlayerDuck.of(player);
-        if (playerDuck.getTrimPower() > tier.passive) {
-            player.addEffect(new MobEffectInstance(mobEffectInstance));
+        if (mobEffectInstance != null) {
+            PlayerDuck playerDuck = PlayerDuck.of(player);
+            if (playerDuck.getTrimPower() > tier.passive) {
+                player.addEffect(new MobEffectInstance(mobEffectInstance));
+            }
         }
     }
 
     public void applySetBonus(Player player,int pieces) {
-        
+
     }
 
     public void activateAbility(Player player, EquipmentSlot slot) {

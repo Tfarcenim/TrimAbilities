@@ -93,7 +93,7 @@ public class TrimAbilities {
         player.connection.disconnect(DEATH_BAN_MESSAGE);
     }
 
-    public static final EquipmentSlot[] armor = new EquipmentSlot[]{EquipmentSlot.HEAD,EquipmentSlot.CHEST,EquipmentSlot.LEGS,EquipmentSlot.FEET};
+    public static final EquipmentSlot[] armor = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
     public static void onClone(ServerPlayer originalPlayer, ServerPlayer newPlayer, boolean alive) {
         PlayerDuck oldPlayerDuck = PlayerDuck.of(originalPlayer);
@@ -132,7 +132,7 @@ public class TrimAbilities {
                 if (armorTrim != null) {
                     Holder<TrimPattern> pattern = armorTrim.pattern();
 
-                    patternCount.put(pattern,patternCount.getInt(pattern) + 1);
+                    patternCount.put(pattern, patternCount.getInt(pattern) + 1);
 
                     TrimPower trimPower = TrimPowers.TRIM_MAP.get(pattern);
                     if (trimPower != null) {
@@ -143,17 +143,21 @@ public class TrimAbilities {
         }
 
         if (player.tickCount % 100 == 0) {
-            for (Object2IntMap.Entry<Holder<TrimPattern>> entry : patternCount.object2IntEntrySet() ) {
+            for (Object2IntMap.Entry<Holder<TrimPattern>> entry : patternCount.object2IntEntrySet()) {
                 Holder<TrimPattern> wardPattern = entry.getKey();
                 int count = entry.getIntValue();
                 TrimPower trimPower = TrimPowers.TRIM_MAP.get(wardPattern);
                 if (trimPower != null) {
-                    trimPower.applySetBonus(player,count);
+                    trimPower.applySetBonus(player, count);
                 }
             }
         }
 
-            if (clientDirty) {
+        if (playerDuck.getFlowTimer() > 0) {
+            playerDuck.setFlowTimer(playerDuck.getFlowTimer() - 1);
+        }
+
+        if (clientDirty) {
             MutableComponent component = Component.empty();
             EquipmentSlot slot1 = playerDuck.getAbility1();
 
@@ -170,7 +174,7 @@ public class TrimAbilities {
 
                 Integer ticks = playerDuck.getCooldowns().get(slot1);
                 if (ticks != null && ticks > 0) {
-                    String sec = String.format("%.0f", ticks/20d);
+                    String sec = String.format("%.0f", ticks / 20d);
                     component.append(sec);
                 } else {
                     component.append("0");
@@ -194,14 +198,14 @@ public class TrimAbilities {
 
                 Integer ticks = playerDuck.getCooldowns().get(slot2);
                 if (ticks != null && ticks > 0) {
-                    String sec = String.format("%.0f", ticks/20d);
+                    String sec = String.format("%.0f", ticks / 20d);
                     component.append(sec);
                 } else {
                     component.append("0");
                 }
             }
 
-            player.displayClientMessage(component,true);
+            player.displayClientMessage(component, true);
         }
 
     }

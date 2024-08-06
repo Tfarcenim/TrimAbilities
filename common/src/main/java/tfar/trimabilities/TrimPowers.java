@@ -21,7 +21,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -54,6 +56,10 @@ public class TrimPowers {
     public static TrimPower SHAPER;
     public static TrimPower TIDE;
     public static TrimPower VEX;
+    public static TrimPower SNOUT;
+    public static TrimPower RIB;
+    public static TrimPower BOLT;
+    public static TrimPower FLOW;
 
     public static void registerPowers(MinecraftServer server) {
         TRIM_MAP.clear();
@@ -153,6 +159,38 @@ public class TrimPowers {
             }
         }
         ));
+
+        SNOUT = register(get(registryAccess,TrimPatterns.SNOUT),new TrimPower(60 * 20,TrimTier.B,createTempEffect(MobEffects.FIRE_RESISTANCE,200,0),player -> {
+            Vec3 vec3 = player.getLookAngle();
+            LargeFireball largeFireball = new LargeFireball(player.level(),player,vec3,3);
+            largeFireball.setPos(player.getX(),player.getY()+player.getEyeHeight(),player.getZ());
+            player.level().addFreshEntity(largeFireball);
+        }
+        ));
+
+        RIB = register(get(registryAccess,TrimPatterns.RIB),new TrimPower(60 * 20,TrimTier.B,null, player -> {
+            TargetingConditions conditions = TargetingConditions.forCombat();
+            Level level = player.level();
+            List<Player> nearby = level.getNearbyPlayers(conditions,player,player.getBoundingBox().inflate(10));
+            for (Player player1 : nearby) {
+                player1.addEffect(createTempEffect(MobEffects.WITHER, 200, 2));
+            }
+        }));
+
+        BOLT = register(get(registryAccess,TrimPatterns.BOLT),new TrimPower(60 * 20,TrimTier.B,null, player -> {
+            TargetingConditions conditions = TargetingConditions.forCombat();
+            Level level = player.level();
+            List<Player> nearby = level.getNearbyPlayers(conditions,player,player.getBoundingBox().inflate(10));
+            for (Player player1 : nearby) {
+                player1.addEffect(createTempEffect(MobEffects.POISON, 200, 2));
+            }
+        }));
+
+
+        FLOW = register(get(registryAccess,TrimPatterns.FLOW),new TrimPower(60 * 20,TrimTier.C,null, player -> {
+            PlayerDuck playerDuck = PlayerDuck.of(player);
+            playerDuck.setFlowTimer(200);
+        }));
 
     }
 

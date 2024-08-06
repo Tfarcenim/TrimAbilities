@@ -23,6 +23,9 @@ public interface PlayerDuck {
     void setAbility1(EquipmentSlot ability1);
     void setAbility2(EquipmentSlot ability2);
 
+    int getFlowTimer();
+    void setFlowTimer(int flowTimer);
+
     default void copyTo(Player newPlayer) {
 
     }
