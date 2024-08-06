@@ -11,6 +11,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
@@ -21,8 +22,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
@@ -31,6 +34,7 @@ import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.item.armortrim.TrimPatterns;
+import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -61,6 +65,11 @@ public class TrimPowers {
     public static TrimPower BOLT;
     public static TrimPower FLOW;
     public static TrimPower HOST;
+    public static TrimPower SPIRE;
+    public static TrimPower WILD;
+    public static TrimPower COAST;
+    public static TrimPower RAISER;
+    public static TrimPower WAYFINDER;
 
     public static void registerPowers(MinecraftServer server) {
         TRIM_MAP.clear();
@@ -194,6 +203,50 @@ public class TrimPowers {
         }));
 
         HOST = register(get(registryAccess,TrimPatterns.FLOW),new TrimPower(0 * 20,TrimTier.C,createTempEffect(MobEffects.BAD_OMEN,200,1), player -> {
+        }));
+
+        SPIRE = register(get(registryAccess,TrimPatterns.SPIRE),new TrimPower(60 * 20,TrimTier.C,createTempEffect(MobEffects.LEVITATION,200,1), player -> {
+            Level level = player.level();
+            ItemStack itemstack = new ItemStack(Items.FIREWORK_ROCKET);
+            Fireworks fireworks = new Fireworks(4,List.of());
+            itemstack.set(DataComponents.FIREWORKS,fireworks);
+            FireworkRocketEntity fireworkrocketentity = new FireworkRocketEntity(level, itemstack, player);
+            level.addFreshEntity(fireworkrocketentity);
+        }));
+
+        WILD = register(get(registryAccess,TrimPatterns.WILD),new TrimPower(3*60 * 20,TrimTier.C,createTempEffect(MobEffects.HERO_OF_THE_VILLAGE,200,1), player -> {
+            player.addEffect(createTempEffect(MobEffects.HERO_OF_THE_VILLAGE,600,4));
+        }));
+
+        COAST = register(get(registryAccess,TrimPatterns.COAST),new TrimPower(60 * 20,TrimTier.C,createTempEffect(MobEffects.WATER_BREATHING,200,0), player -> {
+            player.addEffect(createTempEffect(MobEffects.DOLPHINS_GRACE,100,1));
+        }));
+
+        RAISER = register(get(registryAccess,TrimPatterns.RAISER),new TrimPower(60 * 20,TrimTier.C,null, player -> {
+            PrimedTnt primedTNT = new PrimedTnt(player.level(),player.getX(),player.getY(),player.getZ(),player);
+            primedTNT.setFuse(20);
+            player.level().addFreshEntity(primedTNT);
+        }));
+
+        WAYFINDER = register(get(registryAccess,TrimPatterns.WAYFINDER),new TrimPower(30 * 20,TrimTier.C,createTempEffect(MobEffects.SLOW_FALLING,200,0), player -> {
+            BlockPos pos = player.blockPosition();
+            BlockPos offset = pos;
+            boolean foundGround = false;
+
+            while (!foundGround) {
+
+                if (!player.level().getBlockState(offset).getCollisionShape(player.level(),offset).isEmpty()) {
+                    foundGround = true;
+                } else {
+                    offset = offset.below();
+                    if (offset.getY() <= player.level().getMinBuildHeight()) {
+                        break;
+                    }
+                }
+            }
+            if (foundGround) {
+                player.teleportTo(pos.getX(), offset.getY(), pos.getZ());
+            }
         }));
 
     }
