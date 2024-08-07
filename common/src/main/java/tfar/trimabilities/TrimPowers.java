@@ -10,6 +10,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -125,6 +126,7 @@ public class TrimPowers {
                 Vec3 dir = player.position().subtract(living.position()).normalize().scale(config.wardRange());
                 push(living,dir);
             }
+            ModCommands.playAnvilSound((ServerPlayer) player);
             return true;
         },MobEffects.HEALTH_BOOST));
         DUNE = register(get(registryAccess,TrimPatterns.DUNE),new TrimPower(config.duneCooldown(),TrimTier.B,createTempEffect(MobEffects.DIG_SPEED,25,1), player -> {
@@ -132,7 +134,7 @@ public class TrimPowers {
             return true;
         }));
         SENTRY = register(get(registryAccess,TrimPatterns.SENTRY),new SetBonusTrimPower(config.sentryCooldown(),TrimTier.B,player -> {
-            int arrows = 8;
+            int arrows = config.sentryActiveCount();
 
             for (int i = 0; i < arrows;i++) {
                 double angle = i * 360d / arrows;
@@ -179,6 +181,7 @@ public class TrimPowers {
             HitResult pick = player.pick(config.vexRange(), 0, false);
             if (pick instanceof BlockHitResult blockHitResult) {
                 BlockPos pos = blockHitResult.getBlockPos().above();
+                ModCommands.playVexSound((ServerPlayer) player);
                 player.teleportTo(pos.getX(),pos.getY(),pos.getZ());
             }
             return true;

@@ -49,6 +49,8 @@ public class TrimAbilitiesFabric implements ModInitializer {
                 }
                 ModCommands.spawnWitchParticles((ServerPlayer) player);
                 ModCommands.playUpSound((ServerPlayer) player);
+                ((ServerPlayer) player).sendSystemMessage(Component.literal("New trim power is "+PlayerDuck.of(player).getTrimPower()),false);
+
             } else if (ItemStack.isSameItemSameComponents(stack, ModItems.REVIVE_HEAD)) {
                 boolean b = listBannedPlayers((ServerPlayer) player);
                 if (b && !player.getAbilities().instabuild) {

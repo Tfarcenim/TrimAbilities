@@ -16,8 +16,10 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.BanListEntry;
@@ -27,19 +29,19 @@ import net.minecraft.server.players.UserBanListEntry;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SmithingTemplateItem;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.armortrim.TrimPattern;
 import tfar.trimabilities.init.ModItems;
 import tfar.trimabilities.platform.Services;
 import tfar.trimabilities.trimpower.TrimPower;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class ModCommands {
@@ -120,6 +122,9 @@ public class ModCommands {
                         .executes(ModCommands::changeAbility2)
                 )
         );
+
+        dispatcher.register(Commands.literal("removetrim").executes(ModCommands::removeTrim));
+        dispatcher.register(Commands.literal("mypower").executes(ModCommands::checkPower));
     }
 
 
@@ -137,13 +142,24 @@ public class ModCommands {
         int curPoints = playerDuck.getTrimPower();
         if (curPoints < -3) return 0;
         if (curPoints - points < -4) return 0;
-        playerDuck.setTrimPower(-points);
+        playerDuck.addTrimPower(-points);
         ItemStack stack = ModItems.TRIM_POWER.copyWithCount(points);
         if (!player.addItem(stack)) {
             player.level().addFreshEntity(new ItemEntity(player.serverLevel(), player.getX(), player.getY(), player.getZ(), stack));
         }
+
+        ctx.getSource().sendSuccess(() -> Component.literal("New trim power is "+playerDuck.getTrimPower()),false);
+
         playSound(player);
         spawnWitchParticles(player);
+        return 1;
+    }
+
+    public static int checkPower(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        int curPoints = playerDuck.getTrimPower();
+        ctx.getSource().sendSuccess(() -> Component.literal("Current trim power is "+curPoints),false);
         return 1;
     }
 
@@ -151,6 +167,28 @@ public class ModCommands {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         return 1;
     }
+
+    public static int removeTrim(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ItemStack stack = player.getMainHandItem();
+        ArmorTrim armorTrim = stack.get(DataComponents.TRIM);
+        if (armorTrim != null) {
+            Item item = getArmorTrimItem(armorTrim);
+            if (item != null) {
+                player.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(item));
+            }
+        }
+        return 1;
+    }
+
+    public static final Map<ResourceKey<TrimPattern>,SmithingTemplateItem> MAP = new HashMap<>();
+
+    public static SmithingTemplateItem getArmorTrimItem(ArmorTrim armorTrim) {
+        Holder<TrimPattern> trimPattern = armorTrim.pattern();
+        Optional<ResourceKey<TrimPattern>> trimPatternResourceKey = trimPattern.unwrapKey();
+        return trimPatternResourceKey.map(MAP::get).orElse(null);
+    }
+
 
     public static int changeAbility1(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         String s = StringArgumentType.getString(ctx,"slot");
@@ -217,6 +255,15 @@ public class ModCommands {
     protected static void playSound(ServerPlayer player) {
         player.playNotifySound(SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1, 1);
     }
+
+    public static void playAnvilSound(ServerPlayer player) {
+        player.playNotifySound(SoundEvents.ANVIL_FALL, SoundSource.PLAYERS, 1, 1);
+    }
+
+    public static void playVexSound(ServerPlayer player) {
+        player.playNotifySound(SoundEvents.VEX_DEATH, SoundSource.PLAYERS, 1, 1);
+    }
+
 
     public static void playUpSound(ServerPlayer player) {
         player.playNotifySound(SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1, 1);

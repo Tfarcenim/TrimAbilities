@@ -59,6 +59,8 @@ public class TrimAbilitiesClothConfig implements ConfigData, MLConfig {
 
     public int raiser_active_delay = 20;
 
+    public int sentry_active_count = 8;
+
     @Override
     public int silenceCooldown() {
         return silence_cooldown;
@@ -252,5 +254,10 @@ public class TrimAbilitiesClothConfig implements ConfigData, MLConfig {
     @Override
     public int raiserActiveDelay() {
         return raiser_active_delay;
+    }
+
+    @Override
+    public int sentryActiveCount() {
+        return sentry_active_count;
     }
 }
