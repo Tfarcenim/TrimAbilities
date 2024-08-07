@@ -37,6 +37,10 @@ public class TrimAbilitiesFabric implements ModInitializer {
                 }
                 ModCommands.spawnWitchParticles((ServerPlayer) player);
                 ModCommands.playUpSound((ServerPlayer) player);
+            } else if (ItemStack.isSameItemSameComponents(stack,ModItems.REVIVE_HEAD)) {
+                if (!player.getAbilities().instabuild) {
+                    stack.shrink(1);
+                }
             }
             return InteractionResultHolder.pass(stack);
         });

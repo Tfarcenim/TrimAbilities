@@ -223,15 +223,16 @@ public class ModCommands {
     public static void spawnWitchParticles(ServerPlayer player) {
         RandomSource random = player.getRandom();
         for (int i = 0; i < random.nextInt(35) + 10; i++) {
-            player.level()
-                    .addParticle(
+            player.serverLevel()
+                    .sendParticles(
                             ParticleTypes.WITCH,
                             player.getX() + random.nextGaussian() * 0.13F,
                             player.getBoundingBox().maxY + 0.5 + random.nextGaussian() * 0.13F,
                             player.getZ() + random.nextGaussian() * 0.13F,
+                            1,
                             0.0,
                             0.0,
-                            0.0
+                            0.0,0
                     );
         }
     }
