@@ -7,6 +7,7 @@
     "authors": [
         "${mod_author}"
     ],
+    "accessWidener": "${mod_id}.accesswidener",
     "contact": {
         "homepage": "https://fabricmc.net/",
         "sources": "https://github.com/FabricMC/fabric-example-mod"

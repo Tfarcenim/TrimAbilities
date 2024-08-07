@@ -18,6 +18,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.BanListEntry;
 import net.minecraft.server.players.StoredUserEntry;
@@ -37,6 +38,7 @@ import tfar.trimabilities.trimpower.TrimPower;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -296,6 +298,11 @@ public class ModCommands {
         }
 
         return pBannedPlayerList.size();
+    }
+
+    public static List<GameProfile> getDeathBanned(MinecraftServer server) {
+        return server.getPlayerList().getBans().getEntries().stream()
+                .filter(userBanListEntry -> DEATHBAN.getString().equals(userBanListEntry.getReason())).map(StoredUserEntry::getUser).toList();
     }
 
     private static final SimpleCommandExceptionType ERROR_NOT_BANNED = new SimpleCommandExceptionType(Component.translatable("commands.pardon.failed"));
