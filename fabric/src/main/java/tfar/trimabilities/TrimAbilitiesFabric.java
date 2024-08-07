@@ -16,13 +16,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserBanList;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import tfar.trimabilities.init.ModItems;
 
-import java.util.Collection;
 import java.util.List;
 
 public class TrimAbilitiesFabric implements ModInitializer {
@@ -53,9 +54,11 @@ public class TrimAbilitiesFabric implements ModInitializer {
                 if (b && !player.getAbilities().instabuild) {
                     stack.shrink(1);
                 }
+                return InteractionResultHolder.success(stack);
             }
             return InteractionResultHolder.pass(stack);
         });
+
         AutoConfig.register(TrimAbilitiesClothConfig.class, JanksonConfigSerializer::new);
         CONFIG = AutoConfig.getConfigHolder(TrimAbilitiesClothConfig.class).getConfig();
         // This method is invoked by the Fabric mod loader when it is ready
@@ -64,6 +67,11 @@ public class TrimAbilitiesFabric implements ModInitializer {
 
         // Use Fabric to bootstrap the Common mod.
         TrimAbilities.init();
+    }
+
+    public static InteractionResult attemptPlace(BlockPlaceContext context) {
+
+        return InteractionResult.PASS;
     }
 
     public static boolean listBannedPlayers(ServerPlayer player) {

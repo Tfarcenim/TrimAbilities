@@ -80,7 +80,7 @@ public class TrimPowers {
         MLConfig config = Services.PLATFORM.getConfig();
 
 
-        SILENCE = register(get(registryAccess,TrimPatterns.SILENCE), new TrimPower(config.silenceCooldown(),TrimTier.A,createTempEffect(MobEffects.DAMAGE_RESISTANCE,200,0),player -> {
+        SILENCE = register(get(registryAccess,TrimPatterns.SILENCE), new TrimPower(config.silenceCooldown(),TrimTier.A,createTempEffect(MobEffects.DAMAGE_RESISTANCE,25,0),player -> {
             TargetingConditions conditions = TargetingConditions.forCombat();
             Level level = player.level();
             List<Player> nearby = level.getNearbyPlayers(conditions,player,player.getBoundingBox().inflate(config.silenceRange()));
@@ -104,7 +104,7 @@ public class TrimPowers {
                 }
             }
         }));
-        EYE = register(get(registryAccess,TrimPatterns.EYE),new TrimPower(config.eyeCooldown(),TrimTier.A,createTempEffect(MobEffects.REGENERATION,200,0),player -> {
+        EYE = register(get(registryAccess,TrimPatterns.EYE),new TrimPower(config.eyeCooldown(),TrimTier.A,createTempEffect(MobEffects.REGENERATION,25,0),player -> {
             Level level = player.level();
             ThrownPotion thrownpotion = new ThrownPotion(level, player);
             ItemStack stack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.STRONG_HEALING);
@@ -121,7 +121,7 @@ public class TrimPowers {
                 push(living,dir);
             }
         },MobEffects.HEALTH_BOOST));
-        DUNE = register(get(registryAccess,TrimPatterns.DUNE),new TrimPower(config.duneCooldown(),TrimTier.B,createTempEffect(MobEffects.DIG_SPEED,200,1), player -> {
+        DUNE = register(get(registryAccess,TrimPatterns.DUNE),new TrimPower(config.duneCooldown(),TrimTier.B,createTempEffect(MobEffects.DIG_SPEED,25,1), player -> {
             player.addEffect(createTempEffect(MobEffects.DIG_SPEED,config.duneActiveLength(), config.duneActiveStrength() - 1));
         }));
         SENTRY = register(get(registryAccess,TrimPatterns.SENTRY),new SetBonusTrimPower(config.sentryCooldown(),TrimTier.B,player -> {
@@ -146,7 +146,7 @@ public class TrimPowers {
         SHAPER = register(get(registryAccess,TrimPatterns.SHAPER),new SetBonusTrimPower(config.shaperCooldown(),TrimTier.B,player -> {
             player.addEffect(createTempEffect(MobEffects.MOVEMENT_SPEED,config.shaperActiveLength(),config.shaperActiveStrength() - 1));
         },MobEffects.MOVEMENT_SPEED));
-        TIDE = register(get(registryAccess,TrimPatterns.TIDE),new TrimPower(config.tideCooldown(),TrimTier.B,createTempEffect(MobEffects.DOLPHINS_GRACE,200,0),player -> {
+        TIDE = register(get(registryAccess,TrimPatterns.TIDE),new TrimPower(config.tideCooldown(),TrimTier.B,createTempEffect(MobEffects.DOLPHINS_GRACE,25,0),player -> {
             float f = 3;
             float f7 = player.getYRot();
             float f1 = player.getXRot();
@@ -167,7 +167,7 @@ public class TrimPowers {
         }
         ));
 
-        VEX = register(get(registryAccess,TrimPatterns.VEX),new TrimPower(config.vexCooldown(),TrimTier.B,createTempEffect(MobEffects.INVISIBILITY,200,0),player -> {
+        VEX = register(get(registryAccess,TrimPatterns.VEX),new TrimPower(config.vexCooldown(),TrimTier.B,createTempEffect(MobEffects.INVISIBILITY,25,0),player -> {
             HitResult pick = player.pick(config.vexRange(), 0, false);
             if (pick instanceof BlockHitResult blockHitResult) {
                 BlockPos pos = blockHitResult.getBlockPos().above();
@@ -203,15 +203,15 @@ public class TrimPowers {
         }));
 
 
-        FLOW = register(get(registryAccess,TrimPatterns.FLOW),new TrimPower(config.flowCooldown(),TrimTier.C,createTempEffect(MobEffects.LUCK,200,1), player -> {
+        FLOW = register(get(registryAccess,TrimPatterns.FLOW),new TrimPower(config.flowCooldown(),TrimTier.C,createTempEffect(MobEffects.LUCK,25,1), player -> {
             PlayerDuck playerDuck = PlayerDuck.of(player);
             playerDuck.setFlowTimer(config.flowActiveLength());
         }));
 
-        HOST = register(get(registryAccess,TrimPatterns.FLOW),new TrimPower(config.hostCooldown(),TrimTier.C,createTempEffect(MobEffects.BAD_OMEN,200,1), player -> {
+        HOST = register(get(registryAccess,TrimPatterns.HOST),new TrimPower(config.hostCooldown(),TrimTier.C,createTempEffect(MobEffects.BAD_OMEN,25,1), player -> {
         }));
 
-        SPIRE = register(get(registryAccess,TrimPatterns.SPIRE),new TrimPower(config.spireCooldown(),TrimTier.C,createTempEffect(MobEffects.LEVITATION,200,1), player -> {
+        SPIRE = register(get(registryAccess,TrimPatterns.SPIRE),new TrimPower(config.spireCooldown(),TrimTier.C,createTempEffect(MobEffects.LEVITATION,25,1), player -> {
             Level level = player.level();
             ItemStack itemstack = new ItemStack(Items.FIREWORK_ROCKET);
             Fireworks fireworks = new Fireworks(4,List.of());
@@ -220,11 +220,11 @@ public class TrimPowers {
             level.addFreshEntity(fireworkrocketentity);
         }));
 
-        WILD = register(get(registryAccess,TrimPatterns.WILD),new TrimPower(config.wildCooldown(),TrimTier.C,createTempEffect(MobEffects.HERO_OF_THE_VILLAGE,200,1), player -> {
+        WILD = register(get(registryAccess,TrimPatterns.WILD),new TrimPower(config.wildCooldown(),TrimTier.C,createTempEffect(MobEffects.HERO_OF_THE_VILLAGE,25,1), player -> {
             player.addEffect(createTempEffect(MobEffects.HERO_OF_THE_VILLAGE, config.wildActiveLength(), config.wildActiveStrength() - 1));
         }));
 
-        COAST = register(get(registryAccess,TrimPatterns.COAST),new TrimPower(config.coastCooldown(),TrimTier.C,createTempEffect(MobEffects.WATER_BREATHING,200,0), player -> {
+        COAST = register(get(registryAccess,TrimPatterns.COAST),new TrimPower(config.coastCooldown(),TrimTier.C,createTempEffect(MobEffects.WATER_BREATHING,25,0), player -> {
             player.addEffect(createTempEffect(MobEffects.DOLPHINS_GRACE, config.coastActiveLength(), config.coastActiveStrength() - 1));
         }));
 
@@ -234,7 +234,7 @@ public class TrimPowers {
             player.level().addFreshEntity(primedTNT);
         }));
 
-        WAYFINDER = register(get(registryAccess,TrimPatterns.WAYFINDER),new TrimPower(config.wayfinderCooldown(),TrimTier.C,createTempEffect(MobEffects.SLOW_FALLING,200,0), player -> {
+        WAYFINDER = register(get(registryAccess,TrimPatterns.WAYFINDER),new TrimPower(config.wayfinderCooldown(),TrimTier.C,createTempEffect(MobEffects.SLOW_FALLING,25,0), player -> {
             BlockPos pos = player.blockPosition();
             BlockPos offset = pos;
             boolean foundGround = false;
@@ -251,7 +251,7 @@ public class TrimPowers {
                 }
             }
             if (foundGround) {
-                player.teleportTo(pos.getX(), offset.getY(), pos.getZ());
+                player.teleportTo(pos.getX(), offset.getY()+1, pos.getZ());
             }
         }));
 

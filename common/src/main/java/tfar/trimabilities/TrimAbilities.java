@@ -16,14 +16,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.armortrim.TrimPattern;
-import net.minecraft.world.item.armortrim.TrimPatterns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tfar.trimabilities.init.ModItems;
@@ -127,7 +125,7 @@ public class TrimAbilities {
                 playerDuck.getCooldowns().put(equipmentSlot, value);
                 clientDirty = true;
             }
-            if (player.tickCount % 100 == 0) {
+            if (player.tickCount % 20 == 0) {
                 ArmorTrim armorTrim = getTrim(stack);
                 if (armorTrim != null) {
                     Holder<TrimPattern> pattern = armorTrim.pattern();
@@ -142,7 +140,7 @@ public class TrimAbilities {
             }
         }
 
-        if (player.tickCount % 100 == 0) {
+        if (player.tickCount % 20 == 0) {
             for (Object2IntMap.Entry<Holder<TrimPattern>> entry : patternCount.object2IntEntrySet()) {
                 Holder<TrimPattern> wardPattern = entry.getKey();
                 int count = entry.getIntValue();
@@ -177,7 +175,7 @@ public class TrimAbilities {
                     String sec = String.format("%.0f", ticks / 20d);
                     component.append(sec);
                 } else {
-                    component.append("0");
+                    component.append("Ready!");
                 }
 
                 component.append(" | ");
@@ -201,7 +199,7 @@ public class TrimAbilities {
                     String sec = String.format("%.0f", ticks / 20d);
                     component.append(sec);
                 } else {
-                    component.append("0");
+                    component.append("Ready!");
                 }
             }
 

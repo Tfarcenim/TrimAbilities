@@ -36,7 +36,7 @@ public class ModRecipeProvider extends RecipeProvider {
 
         ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.REVIVE_HEAD)
                 .define('e',Items.DIAMOND_BLOCK)
-                .define('n',Items.GOLDEN_APPLE)
+                .define('n',Items.ENCHANTED_GOLDEN_APPLE)
                 .define('w',Items.ENDER_PEARL)
                 .define('t',Items.BOOK)
                 .define('g',Items.BLACK_DYE)
