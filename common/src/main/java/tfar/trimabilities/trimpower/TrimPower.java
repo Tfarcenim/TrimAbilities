@@ -7,21 +7,21 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import tfar.trimabilities.BooleanFunction;
 import tfar.trimabilities.PlayerDuck;
 import tfar.trimabilities.TrimTier;
 
 import java.util.EnumMap;
-import java.util.function.Consumer;
 
 public class TrimPower {
     protected final int cooldown;
     public final TrimTier tier;
     private final MobEffectInstance mobEffectInstance;
-    private final Consumer<Player> consumer;
+    private final BooleanFunction<Player> consumer;
 
 
 
-    public TrimPower(int cooldown, TrimTier tier, MobEffectInstance mobEffectInstance, Consumer<Player> consumer) {
+    public TrimPower(int cooldown, TrimTier tier, MobEffectInstance mobEffectInstance, BooleanFunction<Player> consumer) {
         this.cooldown = cooldown;
         this.tier = tier;
         this.mobEffectInstance = mobEffectInstance;
@@ -48,8 +48,10 @@ public class TrimPower {
             EnumMap<EquipmentSlot,Integer> cooldowns = playerDuck.getCooldowns();
             Integer cooldown = cooldowns.get(slot);
             if (cooldown == null || cooldown <=0 ) {
-                consumer.accept(player);
-                cooldowns.put(slot,this.cooldown);
+                boolean apply = consumer.apply(player);
+                if (apply) {
+                    cooldowns.put(slot, this.cooldown);
+                }
             }
         }
     }

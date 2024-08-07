@@ -70,7 +70,10 @@ public class TrimAbilitiesFabric implements ModInitializer {
     }
 
     public static InteractionResult attemptPlace(BlockPlaceContext context) {
-
+        ItemStack stack = context.getItemInHand();
+        if (ItemStack.isSameItemSameComponents(ModItems.REVIVE_HEAD,stack)) {
+            return InteractionResult.FAIL;
+        }
         return InteractionResult.PASS;
     }
 

@@ -1,6 +1,7 @@
 package tfar.trimabilities;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
@@ -18,16 +19,14 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Arrow;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.entity.projectile.LargeFireball;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -36,9 +35,7 @@ import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.item.armortrim.TrimPatterns;
 import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.*;
 import tfar.trimabilities.platform.MLConfig;
 import tfar.trimabilities.platform.Services;
 import tfar.trimabilities.trimpower.TrimPower;
@@ -83,11 +80,14 @@ public class TrimPowers {
         SILENCE = register(get(registryAccess,TrimPatterns.SILENCE), new TrimPower(config.silenceCooldown(),TrimTier.A,createTempEffect(MobEffects.DAMAGE_RESISTANCE,25,0),player -> {
             TargetingConditions conditions = TargetingConditions.forCombat();
             Level level = player.level();
-            List<Player> nearby = level.getNearbyPlayers(conditions,player,player.getBoundingBox().inflate(config.silenceRange()));
-            if (!nearby.isEmpty()) {
-                Player living = nearby.getFirst();
+      //      List<Player> nearby = level.getNearbyPlayers(conditions,player,player.getBoundingBox().inflate(config.silenceRange()));
+     //       if (!nearby.isEmpty()) {
+                HitResult hitResult = pick(player,config.silenceRange(),config.silenceRange(),0);//nearby.getFirst();
+            if (hitResult instanceof EntityHitResult entityHitResult) {
+                Entity entity = entityHitResult.getEntity();
+                if (entity instanceof LivingEntity living) {
                 Vec3 vec3 = player.position();
-                Vec3 vec31 = living.getEyePosition().subtract(vec3);
+                Vec3 vec31 = entity.getEyePosition().subtract(vec3);
                 Vec3 vec32 = vec31.normalize();
                 int i = Mth.floor(vec31.length()) + 7;
 
@@ -101,8 +101,12 @@ public class TrimPowers {
                     double d1 = 0.5 * (1.0 - living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
                     double d0 = 2.5 * (1.0 - living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
                     living.push(vec32.x() * d0, vec32.y() * d1, vec32.z() * d0);
+                    return true;
                 }
+                //     }
             }
+            }
+            return false;
         }));
         EYE = register(get(registryAccess,TrimPatterns.EYE),new TrimPower(config.eyeCooldown(),TrimTier.A,createTempEffect(MobEffects.REGENERATION,25,0),player -> {
             Level level = player.level();
@@ -111,6 +115,7 @@ public class TrimPowers {
             thrownpotion.setItem(stack);
             thrownpotion.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.5F, 1.0F);
             level.addFreshEntity(thrownpotion);
+            return true;
         }));
         WARD = register(get(registryAccess,TrimPatterns.WARD),new SetBonusTrimPower(config.wardCooldown(),TrimTier.A, player -> {
             TargetingConditions conditions = TargetingConditions.forCombat();
@@ -120,9 +125,11 @@ public class TrimPowers {
                 Vec3 dir = player.position().subtract(living.position()).normalize().scale(config.wardRange());
                 push(living,dir);
             }
+            return true;
         },MobEffects.HEALTH_BOOST));
         DUNE = register(get(registryAccess,TrimPatterns.DUNE),new TrimPower(config.duneCooldown(),TrimTier.B,createTempEffect(MobEffects.DIG_SPEED,25,1), player -> {
             player.addEffect(createTempEffect(MobEffects.DIG_SPEED,config.duneActiveLength(), config.duneActiveStrength() - 1));
+            return true;
         }));
         SENTRY = register(get(registryAccess,TrimPatterns.SENTRY),new SetBonusTrimPower(config.sentryCooldown(),TrimTier.B,player -> {
             int arrows = 8;
@@ -140,11 +147,11 @@ public class TrimPowers {
                 player.level().playSound(null,player.blockPosition(),SoundEvents.SKELETON_SHOOT,SoundSource.PLAYERS, 1.0F, 1.0F / (player.getRandom().nextFloat() * 0.4F + 0.8F));
                 player.level().addFreshEntity(arrow);
             }
-
+            return true;
         },MobEffects.DAMAGE_BOOST));
 
         SHAPER = register(get(registryAccess,TrimPatterns.SHAPER),new SetBonusTrimPower(config.shaperCooldown(),TrimTier.B,player -> {
-            player.addEffect(createTempEffect(MobEffects.MOVEMENT_SPEED,config.shaperActiveLength(),config.shaperActiveStrength() - 1));
+            return player.addEffect(createTempEffect(MobEffects.MOVEMENT_SPEED,config.shaperActiveLength(),config.shaperActiveStrength() - 1));
         },MobEffects.MOVEMENT_SPEED));
         TIDE = register(get(registryAccess,TrimPatterns.TIDE),new TrimPower(config.tideCooldown(),TrimTier.B,createTempEffect(MobEffects.DOLPHINS_GRACE,25,0),player -> {
             float f = 3;
@@ -164,6 +171,7 @@ public class TrimPowers {
                 player.move(MoverType.SELF, new Vec3(0.0, f6, 0.0));
             }
             player.hurtMarked = true;
+            return true;
         }
         ));
 
@@ -173,6 +181,7 @@ public class TrimPowers {
                 BlockPos pos = blockHitResult.getBlockPos().above();
                 player.teleportTo(pos.getX(),pos.getY(),pos.getZ());
             }
+            return true;
         }
         ));
 
@@ -181,6 +190,7 @@ public class TrimPowers {
             LargeFireball largeFireball = new LargeFireball(player.level(),player,vec3,3);
             largeFireball.setPos(player.getX(),player.getY()+player.getEyeHeight(),player.getZ());
             player.level().addFreshEntity(largeFireball);
+            return true;
         }
         ));
 
@@ -191,6 +201,7 @@ public class TrimPowers {
             for (Player player1 : nearby) {
                 player1.addEffect(createTempEffect(MobEffects.WITHER, config.ribActiveLength(), config.ribActiveStrength() - 1));
             }
+            return true;
         }));
 
         BOLT = register(get(registryAccess,TrimPatterns.BOLT),new TrimPower(config.boltCooldown(),TrimTier.B,null, player -> {
@@ -200,16 +211,17 @@ public class TrimPowers {
             for (Player player1 : nearby) {
                 player1.addEffect(createTempEffect(MobEffects.POISON, config.boltActiveLength(), config.boltActiveStrength() - 1));
             }
+            return true;
         }));
 
 
         FLOW = register(get(registryAccess,TrimPatterns.FLOW),new TrimPower(config.flowCooldown(),TrimTier.C,createTempEffect(MobEffects.LUCK,25,1), player -> {
             PlayerDuck playerDuck = PlayerDuck.of(player);
             playerDuck.setFlowTimer(config.flowActiveLength());
+            return true;
         }));
 
-        HOST = register(get(registryAccess,TrimPatterns.HOST),new TrimPower(config.hostCooldown(),TrimTier.C,createTempEffect(MobEffects.BAD_OMEN,25,1), player -> {
-        }));
+        HOST = register(get(registryAccess,TrimPatterns.HOST),new TrimPower(config.hostCooldown(),TrimTier.C,createTempEffect(MobEffects.BAD_OMEN,25,1), player -> true));
 
         SPIRE = register(get(registryAccess,TrimPatterns.SPIRE),new TrimPower(config.spireCooldown(),TrimTier.C,createTempEffect(MobEffects.LEVITATION,25,1), player -> {
             Level level = player.level();
@@ -218,20 +230,25 @@ public class TrimPowers {
             itemstack.set(DataComponents.FIREWORKS,fireworks);
             FireworkRocketEntity fireworkrocketentity = new FireworkRocketEntity(level, itemstack, player);
             level.addFreshEntity(fireworkrocketentity);
+            return true;
         }));
 
         WILD = register(get(registryAccess,TrimPatterns.WILD),new TrimPower(config.wildCooldown(),TrimTier.C,createTempEffect(MobEffects.HERO_OF_THE_VILLAGE,25,1), player -> {
             player.addEffect(createTempEffect(MobEffects.HERO_OF_THE_VILLAGE, config.wildActiveLength(), config.wildActiveStrength() - 1));
+            return true;
         }));
 
         COAST = register(get(registryAccess,TrimPatterns.COAST),new TrimPower(config.coastCooldown(),TrimTier.C,createTempEffect(MobEffects.WATER_BREATHING,25,0), player -> {
             player.addEffect(createTempEffect(MobEffects.DOLPHINS_GRACE, config.coastActiveLength(), config.coastActiveStrength() - 1));
+            return true;
         }));
 
         RAISER = register(get(registryAccess,TrimPatterns.RAISER),new TrimPower(config.raiserCooldown(),TrimTier.C,null, player -> {
             PrimedTnt primedTNT = new PrimedTnt(player.level(),player.getX(),player.getY(),player.getZ(),player);
+            ((TNTDuck)primedTNT).setDontDamageOwner(true);
             primedTNT.setFuse(config.raiserActiveDelay());
             player.level().addFreshEntity(primedTNT);
+            return true;
         }));
 
         WAYFINDER = register(get(registryAccess,TrimPatterns.WAYFINDER),new TrimPower(config.wayfinderCooldown(),TrimTier.C,createTempEffect(MobEffects.SLOW_FALLING,25,0), player -> {
@@ -253,9 +270,46 @@ public class TrimPowers {
             if (foundGround) {
                 player.teleportTo(pos.getX(), offset.getY()+1, pos.getZ());
             }
+            return true;
         }));
 
     }
+
+
+    private static HitResult pick(Entity pEntity, double pBlockInteractionRange, double pEntityInteractionRange, float pPartialTick) {
+        double d0 = Math.max(pBlockInteractionRange, pEntityInteractionRange);
+        double d1 = Mth.square(d0);
+        Vec3 vec3 = pEntity.getEyePosition(pPartialTick);
+        HitResult hitresult = pEntity.pick(d0, pPartialTick, false);
+        double d2 = hitresult.getLocation().distanceToSqr(vec3);
+        if (hitresult.getType() != HitResult.Type.MISS) {
+            d1 = d2;
+            d0 = Math.sqrt(d2);
+        }
+
+        Vec3 vec31 = pEntity.getViewVector(pPartialTick);
+        Vec3 vec32 = vec3.add(vec31.x * d0, vec31.y * d0, vec31.z * d0);
+        float f = 1.0F;
+        AABB aabb = pEntity.getBoundingBox().expandTowards(vec31.scale(d0)).inflate(1.0, 1.0, 1.0);
+        EntityHitResult entityhitresult = ProjectileUtil.getEntityHitResult(
+                pEntity, vec3, vec32, aabb, p_234237_ -> !p_234237_.isSpectator() && p_234237_.isPickable(), d1
+        );
+        return entityhitresult != null && entityhitresult.getLocation().distanceToSqr(vec3) < d2
+                ? filterHitResult(entityhitresult, vec3, pEntityInteractionRange)
+                : filterHitResult(hitresult, vec3, pBlockInteractionRange);
+    }
+
+    private static HitResult filterHitResult(HitResult pHitResult, Vec3 pPos, double pBlockInteractionRange) {
+        Vec3 vec3 = pHitResult.getLocation();
+        if (!vec3.closerThan(pPos, pBlockInteractionRange)) {
+            Vec3 vec31 = pHitResult.getLocation();
+            Direction direction = Direction.getNearest(vec31.x - pPos.x, vec31.y - pPos.y, vec31.z - pPos.z);
+            return BlockHitResult.miss(vec31, direction, BlockPos.containing(vec31));
+        } else {
+            return pHitResult;
+        }
+    }
+
 
     protected static void push(LivingEntity living, Vec3 dir) {
         living.setDeltaMovement(living.getDeltaMovement().subtract(dir));
