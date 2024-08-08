@@ -76,6 +76,8 @@ public class ModCommands {
                         .then(Commands.literal("list").executes(ModCommands::deathbanList)
                         )
                 )
+                .then(Commands.literal("toggleabilities").executes(ModCommands::toggleAbilities))
+
 
                 .then(Commands.literal("revive")
                         .then(Commands.argument("targets", GameProfileArgument.gameProfile())
@@ -148,7 +150,7 @@ public class ModCommands {
             player.level().addFreshEntity(new ItemEntity(player.serverLevel(), player.getX(), player.getY(), player.getZ(), stack));
         }
 
-        ctx.getSource().sendSuccess(() -> Component.literal("New trim power is "+playerDuck.getTrimPower()),false);
+        ctx.getSource().sendSuccess(() -> Component.literal("New trim power is " + playerDuck.getTrimPower()), false);
 
         playSound(player);
         spawnWitchParticles(player);
@@ -159,7 +161,14 @@ public class ModCommands {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerDuck playerDuck = PlayerDuck.of(player);
         int curPoints = playerDuck.getTrimPower();
-        ctx.getSource().sendSuccess(() -> Component.literal("Current trim power is "+curPoints),false);
+        ctx.getSource().sendSuccess(() -> Component.literal("Current trim power is " + curPoints), false);
+        return 1;
+    }
+
+    public static int toggleAbilities(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        boolean curEnabled = TrimAbilities.ENABLED;
+        TrimAbilities.ENABLED = !TrimAbilities.ENABLED;
+        ctx.getSource().sendSuccess(() -> Component.literal("Trim abilities "+ (curEnabled ? "disabled" : "enabled")), false);
         return 1;
     }
 
@@ -175,13 +184,13 @@ public class ModCommands {
         if (armorTrim != null) {
             Item item = getArmorTrimItem(armorTrim);
             if (item != null) {
-                player.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(item));
+                player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
             }
         }
         return 1;
     }
 
-    public static final Map<ResourceKey<TrimPattern>,SmithingTemplateItem> MAP = new HashMap<>();
+    public static final Map<ResourceKey<TrimPattern>, SmithingTemplateItem> MAP = new HashMap<>();
 
     public static SmithingTemplateItem getArmorTrimItem(ArmorTrim armorTrim) {
         Holder<TrimPattern> trimPattern = armorTrim.pattern();
@@ -191,13 +200,13 @@ public class ModCommands {
 
 
     public static int changeAbility1(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        String s = StringArgumentType.getString(ctx,"slot");
+        String s = StringArgumentType.getString(ctx, "slot");
         EquipmentSlot slot = EquipmentSlot.byName(s);
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerDuck playerDuck = PlayerDuck.of(player);
         if (slot != playerDuck.getAbility2()) {
             playerDuck.setAbility1(slot);
-            ctx.getSource().sendSuccess(() -> Component.literal("Assigned ability 1 to "+slot+" slot"),false);
+            ctx.getSource().sendSuccess(() -> Component.literal("Assigned ability 1 to " + slot + " slot"), false);
             return 1;
         } else {
             ctx.getSource().sendFailure(Component.literal("Cannot assign same slot as ability 2"));
@@ -206,13 +215,13 @@ public class ModCommands {
     }
 
     public static int changeAbility2(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        String s = StringArgumentType.getString(ctx,"slot");
+        String s = StringArgumentType.getString(ctx, "slot");
         EquipmentSlot slot = EquipmentSlot.byName(s);
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerDuck playerDuck = PlayerDuck.of(player);
         if (slot != playerDuck.getAbility1()) {
             playerDuck.setAbility2(slot);
-            ctx.getSource().sendSuccess(() -> Component.literal("Assigned ability 2 to "+slot+" slot"),false);
+            ctx.getSource().sendSuccess(() -> Component.literal("Assigned ability 2 to " + slot + " slot"), false);
             return 1;
         } else {
             ctx.getSource().sendFailure(Component.literal("Cannot assign same slot as ability 1"));
@@ -221,6 +230,7 @@ public class ModCommands {
     }
 
     public static int useAbility1(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!TrimAbilities.ENABLED) return 0;
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerDuck playerDuck = PlayerDuck.of(player);
         EquipmentSlot slot = playerDuck.getAbility1();
@@ -230,13 +240,14 @@ public class ModCommands {
             Holder<TrimPattern> trimPattern = armorTrim.pattern();
             TrimPower trimPower = TrimPowers.TRIM_MAP.get(trimPattern);
             if (trimPower != null) {
-                trimPower.activateAbility(player,slot);
+                trimPower.activateAbility(player, slot);
             }
         }
         return 1;
     }
 
     public static int useAbility2(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if (!TrimAbilities.ENABLED) return 0;
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerDuck playerDuck = PlayerDuck.of(player);
         EquipmentSlot slot = playerDuck.getAbility2();
@@ -246,7 +257,7 @@ public class ModCommands {
             Holder<TrimPattern> trimPattern = armorTrim.pattern();
             TrimPower trimPower = TrimPowers.TRIM_MAP.get(trimPattern);
             if (trimPower != null) {
-                trimPower.activateAbility(player,slot);
+                trimPower.activateAbility(player, slot);
             }
         }
         return 1;
@@ -281,7 +292,7 @@ public class ModCommands {
                             1,
                             0.0,
                             0.0,
-                            0.0,0
+                            0.0, 0
                     );
         }
     }

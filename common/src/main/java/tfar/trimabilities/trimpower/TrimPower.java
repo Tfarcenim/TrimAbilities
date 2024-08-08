@@ -9,6 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import tfar.trimabilities.BooleanFunction;
 import tfar.trimabilities.PlayerDuck;
+import tfar.trimabilities.TrimAbilities;
 import tfar.trimabilities.TrimTier;
 
 import java.util.EnumMap;
@@ -43,6 +44,7 @@ public class TrimPower {
     }
 
     public void activateAbility(Player player, EquipmentSlot slot) {
+        if (!TrimAbilities.ENABLED) return;
         PlayerDuck playerDuck = PlayerDuck.of(player);
         if (playerDuck.getTrimPower() > tier.active) {
             EnumMap<EquipmentSlot,Integer> cooldowns = playerDuck.getCooldowns();

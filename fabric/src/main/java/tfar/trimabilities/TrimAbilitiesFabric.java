@@ -42,6 +42,7 @@ public class TrimAbilitiesFabric implements ModInitializer {
             if (world.isClientSide) return InteractionResultHolder.pass(stack);
 
             if (player.isSpectator()) return InteractionResultHolder.pass(stack);
+            if (!TrimAbilities.ENABLED) return InteractionResultHolder.pass(stack);
             if (ItemStack.isSameItemSameComponents(stack, ModItems.TRIM_POWER)) {
                 PlayerDuck.of(player).addTrimPower(1);
                 if (!player.getAbilities().instabuild) {

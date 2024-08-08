@@ -36,6 +36,7 @@ public class TrimAbilities {
     public static final String MOD_ID = "trimabilities";
     public static final String MOD_NAME = "TrimAbilities";
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
+    public static boolean ENABLED = true;
 
 
     // The loader specific projects are able to import and use any code from the common project. This allows you to
@@ -51,6 +52,7 @@ public class TrimAbilities {
     }
 
     public static void onDeath(LivingEntity living, DamageSource damageSource) {
+        if (!TrimAbilities.ENABLED) return;
         if (living instanceof ServerPlayer serverPlayer) {
             PlayerDuck playerDuck = PlayerDuck.of(serverPlayer);
 
@@ -114,6 +116,7 @@ public class TrimAbilities {
 
 
     public static void playerTick(ServerPlayer player) {
+        if (!ENABLED) return;
         boolean clientDirty = false;
         PlayerDuck playerDuck = PlayerDuck.of(player);
         Object2IntMap<Holder<TrimPattern>> patternCount = new Object2IntOpenHashMap<>();
