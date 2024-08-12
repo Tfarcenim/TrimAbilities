@@ -178,10 +178,10 @@ public class TrimAbilities {
                     String sec = String.format("%.0f", ticks / 20d);
                     component.append(sec);
                 } else {
-                    component.append("Ready!");
+                    component.append(Component.literal("\u2714").withStyle(ChatFormatting.GREEN));
                 }
 
-                component.append(" | ");
+                component.append(Component.literal(" | ").withStyle(ChatFormatting.DARK_GRAY));
             }
 
             EquipmentSlot slot2 = playerDuck.getAbility2();
@@ -202,7 +202,7 @@ public class TrimAbilities {
                     String sec = String.format("%.0f", ticks / 20d);
                     component.append(sec);
                 } else {
-                    component.append("Ready!");
+                    component.append(Component.literal("\u2714").withStyle(ChatFormatting.GREEN));
                 }
             }
 

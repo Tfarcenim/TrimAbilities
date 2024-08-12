@@ -7,6 +7,7 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.CustomModelData;
 
 public class ModItems {
 
@@ -22,15 +23,17 @@ public class ModItems {
         trimPoint.set(DataComponents.RARITY, Rarity.RARE);
         trimPoint.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
         trimPoint.set(DataComponents.CUSTOM_NAME, Component.literal("Trim Power").setStyle(Style.EMPTY.withItalic(false)));
+        trimPoint.set(DataComponents.CUSTOM_MODEL_DATA,new CustomModelData(1));
         return trimPoint;
     }
 
     public static ItemStack createReviveHead() {
-        ItemStack trimPoint = new ItemStack(Items.GOLD_BLOCK);
-        trimPoint.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE,true);
-        trimPoint.set(DataComponents.RARITY, Rarity.RARE);
-        trimPoint.set(DataComponents.CUSTOM_NAME, Component.literal("Revive Head").setStyle(Style.EMPTY.withItalic(false)));
-        return trimPoint;
+        ItemStack reviveHead = new ItemStack(Items.GOLD_BLOCK);
+        reviveHead.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE,true);
+        reviveHead.set(DataComponents.RARITY, Rarity.RARE);
+        reviveHead.set(DataComponents.CUSTOM_NAME, Component.literal("Revive Head").setStyle(Style.EMPTY.withItalic(false)));
+        reviveHead.set(DataComponents.CUSTOM_MODEL_DATA,new CustomModelData(2));
+        return reviveHead;
     }
 
     public static ItemStack yes() {

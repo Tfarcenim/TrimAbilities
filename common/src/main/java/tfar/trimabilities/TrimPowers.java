@@ -87,7 +87,7 @@ public class TrimPowers {
             if (hitResult instanceof EntityHitResult entityHitResult) {
                 Entity entity = entityHitResult.getEntity();
                 if (entity instanceof LivingEntity living) {
-                Vec3 vec3 = player.position();
+                Vec3 vec3 = player.getEyePosition();
                 Vec3 vec31 = entity.getEyePosition().subtract(vec3);
                 Vec3 vec32 = vec31.normalize();
                 int i = Mth.floor(vec31.length()) + 7;
@@ -188,7 +188,7 @@ public class TrimPowers {
         }
         ));
 
-        SNOUT = register(get(registryAccess,TrimPatterns.SNOUT),new TrimPower(config.snoutCooldown(),TrimTier.B,createTempEffect(MobEffects.FIRE_RESISTANCE,200,0),player -> {
+        SNOUT = register(get(registryAccess,TrimPatterns.SNOUT),new TrimPower(config.snoutCooldown(),TrimTier.B,createTempEffect(MobEffects.FIRE_RESISTANCE,25,0),player -> {
             Vec3 vec3 = player.getLookAngle();
             LargeFireball largeFireball = new LargeFireball(player.level(),player,vec3,3);
             largeFireball.setPos(player.getX(),player.getY()+player.getEyeHeight(),player.getZ());

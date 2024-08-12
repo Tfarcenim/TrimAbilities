@@ -268,11 +268,11 @@ public class ModCommands {
     }
 
     public static void playAnvilSound(ServerPlayer player) {
-        player.playNotifySound(SoundEvents.ANVIL_FALL, SoundSource.PLAYERS, 1, 1);
+        player.serverLevel().playSound(null,player.blockPosition(),SoundEvents.ANVIL_FALL, SoundSource.PLAYERS, 1, 1);
     }
 
     public static void playVexSound(ServerPlayer player) {
-        player.playNotifySound(SoundEvents.VEX_DEATH, SoundSource.PLAYERS, 1, 1);
+        player.serverLevel().playSound(null,player.blockPosition(),SoundEvents.VEX_DEATH, SoundSource.PLAYERS, 1, 1);
     }
 
 
