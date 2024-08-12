@@ -252,9 +252,19 @@ public class ModCommands {
         PlayerDuck playerDuck = PlayerDuck.of(player);
         EquipmentSlot slot = playerDuck.getAbility2();
         ItemStack stack = player.getItemBySlot(slot);
-        ArmorTrim armorTrim = stack.get(DataComponents.TRIM);
-        if (armorTrim != null) {
-            Holder<TrimPattern> trimPattern = armorTrim.pattern();
+        ArmorTrim armorTrim2 = stack.get(DataComponents.TRIM);
+        if (armorTrim2 != null) {
+            EquipmentSlot slot1 = playerDuck.getAbility1();
+            if (slot1 != null) {
+                ItemStack stack1 = player.getItemBySlot(slot1);
+                ArmorTrim armorTrim1 = stack1.get(DataComponents.TRIM);
+                if (Objects.equals(armorTrim1,armorTrim2)) {
+                    return 0;
+                }
+            }
+
+
+            Holder<TrimPattern> trimPattern = armorTrim2.pattern();
             TrimPower trimPower = TrimPowers.TRIM_MAP.get(trimPattern);
             if (trimPower != null) {
                 trimPower.activateAbility(player, slot);

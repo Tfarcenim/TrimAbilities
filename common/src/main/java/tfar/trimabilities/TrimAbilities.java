@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import tfar.trimabilities.init.ModItems;
 import tfar.trimabilities.trimpower.TrimPower;
 
+import java.util.Objects;
+
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
 // common compatible binaries. This means common code can not directly use loader specific concepts such as Forge events
@@ -117,7 +119,7 @@ public class TrimAbilities {
 
     public static void playerTick(ServerPlayer player) {
         if (!ENABLED) return;
-        boolean clientDirty = false;
+        boolean clientDirty = true;
         PlayerDuck playerDuck = PlayerDuck.of(player);
         Object2IntMap<Holder<TrimPattern>> patternCount = new Object2IntOpenHashMap<>();
         for (EquipmentSlot equipmentSlot : armor) {
@@ -161,13 +163,16 @@ public class TrimAbilities {
         if (clientDirty) {
             MutableComponent component = Component.empty();
             EquipmentSlot slot1 = playerDuck.getAbility1();
+            ArmorTrim armorTrim1 = null;
+            if (slot1 != null) {
+                armorTrim1 = player.getItemBySlot(slot1).get(DataComponents.TRIM);
+            }
+
 
             if (slot1 != null) {
-                ItemStack stack = player.getItemBySlot(slot1);
-                ArmorTrim armorTrim = getTrim(stack);
-                if (armorTrim != null) {
-                    Holder<TrimPattern> pattern = armorTrim.pattern();
-                    component.append(CommonComponents.space().append(pattern.value().copyWithStyle(armorTrim.material())));
+                if (armorTrim1 != null) {
+                    Holder<TrimPattern> pattern = armorTrim1.pattern();
+                    component.append(CommonComponents.space().append(pattern.value().copyWithStyle(armorTrim1.material())));
                 } else {
                     component.append("Empty");
                 }
@@ -187,10 +192,11 @@ public class TrimAbilities {
             EquipmentSlot slot2 = playerDuck.getAbility2();
             if (slot2 != null) {
                 ItemStack stack = player.getItemBySlot(slot2);
-                ArmorTrim armorTrim = getTrim(stack);
-                if (armorTrim != null) {
-                    Holder<TrimPattern> pattern = armorTrim.pattern();
-                    component.append(CommonComponents.space().append(pattern.value().copyWithStyle(armorTrim.material())));
+                ArmorTrim armorTrim2 = getTrim(stack);
+
+                if (armorTrim2 != null && !Objects.equals(armorTrim2,armorTrim1)) {
+                    Holder<TrimPattern> pattern = armorTrim2.pattern();
+                        component.append(CommonComponents.space().append(pattern.value().copyWithStyle(armorTrim2.material())));
                 } else {
                     component.append("Empty");
                 }
