@@ -15,7 +15,7 @@ import tfar.trimabilities.TrimTier;
 import java.util.EnumMap;
 
 public class TrimPower {
-    protected final int cooldown;
+    public final int cooldown;
     public final TrimTier tier;
     private final MobEffectInstance mobEffectInstance;
     private final BooleanFunction<Player> consumer;

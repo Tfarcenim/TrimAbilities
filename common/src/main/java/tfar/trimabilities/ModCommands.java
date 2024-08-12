@@ -168,7 +168,7 @@ public class ModCommands {
     public static int toggleAbilities(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         boolean curEnabled = TrimAbilities.ENABLED;
         TrimAbilities.ENABLED = !TrimAbilities.ENABLED;
-        ctx.getSource().sendSuccess(() -> Component.literal("Trim abilities "+ (curEnabled ? "disabled" : "enabled")), false);
+        ctx.getSource().sendSuccess(() -> Component.literal("Trim abilities " + (curEnabled ? "disabled" : "enabled")), false);
         return 1;
     }
 
@@ -206,6 +206,20 @@ public class ModCommands {
         PlayerDuck playerDuck = PlayerDuck.of(player);
         if (slot != playerDuck.getAbility2()) {
             playerDuck.setAbility1(slot);
+            ItemStack stack = player.getItemBySlot(slot);
+            if (!stack.isEmpty()) {
+                ArmorTrim armorTrim = stack.get(DataComponents.TRIM);
+                if (armorTrim != null) {
+                    TrimPower trimPower = TrimPowers.TRIM_MAP.get(armorTrim.pattern());
+                    if (trimPower != null) {
+                        EnumMap<EquipmentSlot, Integer> cooldowns = playerDuck.getCooldowns();
+                        Integer cooldown = cooldowns.get(slot);
+                        if (cooldown == null || cooldown <= 0) {
+                            cooldowns.put(slot, trimPower.cooldown);
+                        }
+                    }
+                }
+            }
             ctx.getSource().sendSuccess(() -> Component.literal("Assigned ability 1 to " + slot + " slot"), false);
             return 1;
         } else {
@@ -221,6 +235,20 @@ public class ModCommands {
         PlayerDuck playerDuck = PlayerDuck.of(player);
         if (slot != playerDuck.getAbility1()) {
             playerDuck.setAbility2(slot);
+            ItemStack stack = player.getItemBySlot(slot);
+            if (!stack.isEmpty()) {
+                ArmorTrim armorTrim = stack.get(DataComponents.TRIM);
+                if (armorTrim != null) {
+                    TrimPower trimPower = TrimPowers.TRIM_MAP.get(armorTrim.pattern());
+                    if (trimPower != null) {
+                        EnumMap<EquipmentSlot, Integer> cooldowns = playerDuck.getCooldowns();
+                        Integer cooldown = cooldowns.get(slot);
+                        if (cooldown == null || cooldown <= 0) {
+                            cooldowns.put(slot, trimPower.cooldown);
+                        }
+                    }
+                }
+            }
             ctx.getSource().sendSuccess(() -> Component.literal("Assigned ability 2 to " + slot + " slot"), false);
             return 1;
         } else {
@@ -258,7 +286,7 @@ public class ModCommands {
             if (slot1 != null) {
                 ItemStack stack1 = player.getItemBySlot(slot1);
                 ArmorTrim armorTrim1 = stack1.get(DataComponents.TRIM);
-                if (Objects.equals(armorTrim1,armorTrim2)) {
+                if (Objects.equals(armorTrim1, armorTrim2)) {
                     return 0;
                 }
             }
@@ -278,11 +306,11 @@ public class ModCommands {
     }
 
     public static void playAnvilSound(ServerPlayer player) {
-        player.serverLevel().playSound(null,player.blockPosition(),SoundEvents.ANVIL_FALL, SoundSource.PLAYERS, 1, 1);
+        player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.ANVIL_FALL, SoundSource.PLAYERS, 1, 1);
     }
 
     public static void playVexSound(ServerPlayer player) {
-        player.serverLevel().playSound(null,player.blockPosition(),SoundEvents.VEX_DEATH, SoundSource.PLAYERS, 1, 1);
+        player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.VEX_DEATH, SoundSource.PLAYERS, 1, 1);
     }
 
 
