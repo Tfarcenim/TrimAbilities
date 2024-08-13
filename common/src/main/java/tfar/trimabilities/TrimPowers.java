@@ -190,7 +190,7 @@ public class TrimPowers {
 
         SNOUT = register(get(registryAccess,TrimPatterns.SNOUT),new TrimPower(config.snoutCooldown(),TrimTier.B,createTempEffect(MobEffects.FIRE_RESISTANCE,25,0),player -> {
             Vec3 vec3 = player.getLookAngle();
-            LargeFireball largeFireball = new LargeFireball(player.level(),player,vec3,3);
+            LargeFireball largeFireball = new LargeFireball(player.level(),player,vec3, (int) config.snoutActivePower());
             largeFireball.setPos(player.getX(),player.getY()+player.getEyeHeight(),player.getZ());
             player.level().addFreshEntity(largeFireball);
             return true;
@@ -248,7 +248,9 @@ public class TrimPowers {
 
         RAISER = register(get(registryAccess,TrimPatterns.RAISER),new TrimPower(config.raiserCooldown(),TrimTier.C,null, player -> {
             PrimedTnt primedTNT = new PrimedTnt(player.level(),player.getX(),player.getY(),player.getZ(),player);
-            ((TNTDuck)primedTNT).setDontDamageOwner(true);
+            TNTDuck tntDuck = TNTDuck.of(primedTNT);
+            tntDuck.setDontDamageOwner(true);
+            tntDuck.setPower((float) config.raiserActivePower());
             primedTNT.setFuse(config.raiserActiveDelay());
             player.level().addFreshEntity(primedTNT);
             return true;

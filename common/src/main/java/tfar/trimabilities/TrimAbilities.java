@@ -238,6 +238,10 @@ public class TrimAbilities {
         }
     }
 
+    public static MutableComponent prefix(MutableComponent component) {
+        return Component.literal("<Server>").append(component);
+    }
+
     public static void onServerStarted(MinecraftServer server) {
         TrimPowers.registerPowers(server);
     }

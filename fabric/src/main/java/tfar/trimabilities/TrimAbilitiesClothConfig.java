@@ -58,8 +58,11 @@ public class TrimAbilitiesClothConfig implements ConfigData, MLConfig {
     public int coast_active_strength = 2;
 
     public int raiser_active_delay = 20;
+    public double raiser_active_power = 4;
 
     public int sentry_active_count = 8;
+
+    public int snout_active_power = 3;
 
     @Override
     public int silenceCooldown() {
@@ -257,7 +260,17 @@ public class TrimAbilitiesClothConfig implements ConfigData, MLConfig {
     }
 
     @Override
+    public double raiserActivePower() {
+        return raiser_active_power;
+    }
+
+    @Override
     public int sentryActiveCount() {
         return sentry_active_count;
+    }
+
+    @Override
+    public int snoutActivePower() {
+        return snout_active_power;
     }
 }

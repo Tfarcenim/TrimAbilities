@@ -53,6 +53,9 @@ public interface MLConfig {
     int coastActiveStrength();
 
     int raiserActiveDelay();
+    double raiserActivePower();
 
     int sentryActiveCount();
+
+    int snoutActivePower();
 }
