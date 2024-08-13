@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import tfar.trimabilities.init.ModItems;
 import tfar.trimabilities.trimpower.TrimPower;
 
+import java.util.EnumMap;
 import java.util.Objects;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
@@ -218,6 +219,24 @@ public class TrimAbilities {
     }
 
     //[ABILITY 1 TRIM NAME]: [SECONDS] | [ABILITY 2 TRIM NAME]: [SECONDS]
+
+    public static void onItemEquipped(LivingEntity living,EquipmentSlot slot,ItemStack oldItem,ItemStack newItem) {
+        if (living instanceof ServerPlayer serverPlayer && slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+            if (!newItem.isEmpty()) {
+                ArmorTrim armorTrim = newItem.get(DataComponents.TRIM);
+                if (armorTrim != null) {
+                    TrimPower trimPower = TrimPowers.TRIM_MAP.get(armorTrim.pattern());
+                    if (trimPower != null) {
+                        EnumMap<EquipmentSlot, Integer> cooldowns = PlayerDuck.of(serverPlayer).getCooldowns();
+                        Integer cooldown = cooldowns.get(slot);
+                        if (cooldown == null || cooldown <= 0) {
+                            cooldowns.put(slot, trimPower.cooldown);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     public static void onServerStarted(MinecraftServer server) {
         TrimPowers.registerPowers(server);
