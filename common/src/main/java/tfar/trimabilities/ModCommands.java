@@ -150,7 +150,7 @@ public class ModCommands {
             player.level().addFreshEntity(new ItemEntity(player.serverLevel(), player.getX(), player.getY(), player.getZ(), stack));
         }
 
-        ctx.getSource().sendSuccess(() -> Component.literal("New trim power is " + playerDuck.getTrimPower()), false);
+        ctx.getSource().sendSuccess(() -> TrimAbilities.prefix().append(Component.literal("New trim power is " + playerDuck.getTrimPower())), false);
 
         playSound(player);
         spawnWitchParticles(player);
@@ -161,7 +161,7 @@ public class ModCommands {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerDuck playerDuck = PlayerDuck.of(player);
         int curPoints = playerDuck.getTrimPower();
-        ctx.getSource().sendSuccess(() -> Component.literal("Current trim power is " + curPoints), false);
+        ctx.getSource().sendSuccess(() -> TrimAbilities.prefix().append(Component.literal("Current trim power is " + curPoints)), false);
         return 1;
     }
 
@@ -220,10 +220,10 @@ public class ModCommands {
                     }
                 }
             }
-            ctx.getSource().sendSuccess(() -> Component.literal("Assigned ability 1 to " + slot + " slot"), false);
+            ctx.getSource().sendSuccess(() -> TrimAbilities.prefix().append(Component.literal("Assigned ability 1 to " + slot + " slot")), false);
             return 1;
         } else {
-            ctx.getSource().sendFailure(Component.literal("Cannot assign same slot as ability 2"));
+            ctx.getSource().sendFailure(TrimAbilities.prefix().append(Component.literal("Cannot assign same slot as ability 2")));
             return 0;
         }
     }
@@ -249,10 +249,10 @@ public class ModCommands {
                     }
                 }
             }
-            ctx.getSource().sendSuccess(() -> Component.literal("Assigned ability 2 to " + slot + " slot"), false);
+            ctx.getSource().sendSuccess(() -> TrimAbilities.prefix().append(Component.literal("Assigned ability 2 to " + slot + " slot")), false);
             return 1;
         } else {
-            ctx.getSource().sendFailure(Component.literal("Cannot assign same slot as ability 1"));
+            ctx.getSource().sendFailure(TrimAbilities.prefix().append(Component.literal("Cannot assign same slot as ability 1")));
             return 0;
         }
     }

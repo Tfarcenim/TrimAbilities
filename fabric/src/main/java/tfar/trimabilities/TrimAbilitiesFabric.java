@@ -50,7 +50,7 @@ public class TrimAbilitiesFabric implements ModInitializer {
                 }
                 ModCommands.spawnWitchParticles((ServerPlayer) player);
                 ModCommands.playUpSound((ServerPlayer) player);
-                ((ServerPlayer) player).sendSystemMessage(Component.literal("New trim power is "+PlayerDuck.of(player).getTrimPower()),false);
+                ((ServerPlayer) player).sendSystemMessage(TrimAbilities.prefix().append(Component.literal("New trim power is "+PlayerDuck.of(player).getTrimPower())),false);
 
             } else if (ItemStack.isSameItemSameComponents(stack, ModItems.REVIVE_HEAD)) {
                 boolean b = listBannedPlayers((ServerPlayer) player);
@@ -125,7 +125,7 @@ public class TrimAbilitiesFabric implements ModInitializer {
                         .setSkullOwner(gameProfile, player.server)
                         .setName(Component.literal(string)).setCallback((i1, clickType, clickType1) -> {
                             userbanlist.remove(gameProfile);
-                            player.sendSystemMessage(Component.literal("Revived " + gameProfile.getName()));
+                            player.sendSystemMessage(TrimAbilities.prefix().append(Component.literal("Revived " + gameProfile.getName())));
                             onlineGui.close();
                         }));
             }

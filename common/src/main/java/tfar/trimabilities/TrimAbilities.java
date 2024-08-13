@@ -238,8 +238,8 @@ public class TrimAbilities {
         }
     }
 
-    public static MutableComponent prefix(MutableComponent component) {
-        return Component.literal("<Server>").append(component);
+    public static MutableComponent prefix() {
+        return Component.literal("<Server> ");
     }
 
     public static void onServerStarted(MinecraftServer server) {
