@@ -230,7 +230,7 @@ public class TrimAbilities {
                     if (trimPower != null) {
                         EnumMap<EquipmentSlot, Integer> cooldowns = PlayerDuck.of(serverPlayer).getCooldowns();
                         Integer cooldown = cooldowns.get(slot);
-                        if (cooldown == null || cooldown <= 0) {
+                        if (cooldown == null || cooldown < trimPower.cooldown) {
                             cooldowns.put(slot, trimPower.cooldown);
                         }
                     }

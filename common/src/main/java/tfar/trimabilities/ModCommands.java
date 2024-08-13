@@ -214,7 +214,7 @@ public class ModCommands {
                     if (trimPower != null) {
                         EnumMap<EquipmentSlot, Integer> cooldowns = playerDuck.getCooldowns();
                         Integer cooldown = cooldowns.get(slot);
-                        if (cooldown == null || cooldown <= 0) {
+                        if (cooldown == null || cooldown <= trimPower.cooldown) {
                             cooldowns.put(slot, trimPower.cooldown);
                         }
                     }
@@ -243,7 +243,7 @@ public class ModCommands {
                     if (trimPower != null) {
                         EnumMap<EquipmentSlot, Integer> cooldowns = playerDuck.getCooldowns();
                         Integer cooldown = cooldowns.get(slot);
-                        if (cooldown == null || cooldown <= 0) {
+                        if (cooldown == null || cooldown <= trimPower.cooldown) {
                             cooldowns.put(slot, trimPower.cooldown);
                         }
                     }
