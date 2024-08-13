@@ -22,6 +22,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.armortrim.TrimPattern;
+import net.minecraft.world.item.crafting.CraftingInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tfar.trimabilities.init.ModItems;
@@ -244,5 +245,15 @@ public class TrimAbilities {
 
     public static void onServerStarted(MinecraftServer server) {
         TrimPowers.registerPowers(server);
+    }
+
+    public static boolean onAttemptCraft(CraftingInput input,ItemStack result) {
+        if (ItemStack.isSameItemSameComponents(result, ModItems.REVIVE_HEAD)) {
+            ItemStack stack = input.getItem(1,2);
+            if (!ItemStack.isSameItemSameComponents(stack,ModItems.TRIM_POWER)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

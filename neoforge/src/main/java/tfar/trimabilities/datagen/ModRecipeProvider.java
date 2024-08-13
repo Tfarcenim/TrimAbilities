@@ -39,10 +39,10 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('n',Items.ENCHANTED_GOLDEN_APPLE)
                 .define('w',Items.ENDER_PEARL)
                 .define('t',Items.BOOK)
-                .define('g',Items.BLACK_DYE)
+           //     .define('g',Items.BLACK_DYE)
                 .pattern("ene")
                 .pattern("wtw")
-                .pattern("ege")
+                .pattern("ene")
                 .unlockedBy(getHasName(Items.DIAMOND_BLOCK),has(Items.DIAMOND_BLOCK))
                 .save(recipeOutput,TrimAbilities.id("revive_head"));
     }

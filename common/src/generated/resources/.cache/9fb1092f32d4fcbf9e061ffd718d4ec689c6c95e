@@ -1,5 +1,5 @@
-// 1.21	2024-08-07T10:16:45.1765588	Recipes
+// 1.21	2024-08-13T14:05:02.897186	Recipes
 373b0b4dda5e8dd10a045495f16da86c9e4177f6 data/trimabilities/advancement/recipes/combat/revive_head.json
 2fe5fc6f330dad39eb221d4c88b4f97ecdb76cf8 data/trimabilities/advancement/recipes/combat/trim_power.json
-a04318c087c2b9a65607f2afa748b7cf566e712e data/trimabilities/recipe/revive_head.json
-427745fc7b7295f4b910d72cacfae2ced895c9c5 data/trimabilities/recipe/trim_power.json
+d4a68f6d51655c7038fa4596875ddb6bf3181e7b data/trimabilities/recipe/revive_head.json
+fea43ea52fb99205ebec7f9a6126f482215b05c4 data/trimabilities/recipe/trim_power.json
